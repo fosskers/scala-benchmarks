@@ -24,17 +24,17 @@ class SetBench {
   }
 
   @Benchmark
-  def withDistinct: List[Pair] = smallList.map { case Pair(c,r) => Pair(c + 1, r) }.distinct
+  def withDistinct: Iterator[Pair] = smallList.map { case Pair(c,r) => Pair(c + 1, r) }.distinct.iterator
   @Benchmark
-  def withDistinct2: List[Pair] = bigList.map { case Pair(c,r) => Pair(c + 1, r) }.distinct
+  def withDistinct2: Iterator[Pair] = bigList.map { case Pair(c,r) => Pair(c + 1, r) }.distinct.iterator
   @Benchmark
-  def withDistinct3: List[Pair] = hugeList.map { case Pair(c,r) => Pair(c + 1, r) }.distinct
+  def withDistinct3: Iterator[Pair] = hugeList.map { case Pair(c,r) => Pair(c + 1, r) }.distinct.iterator
 
   @Benchmark
-  def withSet: List[Pair] = smallList.map { case Pair(c,r) => Pair(c + 1, r) }.toSet.toList
+  def withSet: Iterator[Pair] = smallList.map { case Pair(c,r) => Pair(c + 1, r) }.toSet.iterator
   @Benchmark
-  def withSet2: List[Pair] = bigList.map { case Pair(c,r) => Pair(c + 1, r) }.toSet.toList
+  def withSet2: Iterator[Pair] = bigList.map { case Pair(c,r) => Pair(c + 1, r) }.toSet.iterator
   @Benchmark
-  def withSet3: List[Pair] = hugeList.map { case Pair(c,r) => Pair(c + 1, r) }.toSet.toList
+  def withSet3: Iterator[Pair] = hugeList.map { case Pair(c,r) => Pair(c + 1, r) }.toSet.iterator
 
 }
