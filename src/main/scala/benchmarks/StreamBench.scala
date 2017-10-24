@@ -64,9 +64,9 @@ class StreamBench {
 
   @Benchmark
   def arrayOps0: Int = arr0.map(_ + 1).filter(_ % 2 == 0).map(_ * 2).max
-    @Benchmark
+  @Benchmark
   def arrayOps1: Int = arr1.map(_ + 1).filter(_ % 2 == 0).map(_ * 2).max
-    @Benchmark
+  @Benchmark
   def arrayOps2: Int = arr2.map(_ + 1).filter(_ % 2 == 0).map(_ * 2).max
 
 }
