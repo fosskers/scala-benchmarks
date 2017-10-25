@@ -6,7 +6,9 @@ import org.openjdk.jmh.annotations._
 
 // --- //
 
-case class Pair(col: Int, row: Int)
+case class Pair(col: Int, row: Int) {
+  def +(other: Pair): Pair = Pair(this.col + other.col, this.row + other.row)
+}
 
 @BenchmarkMode(Array(Mode.AverageTime))
 @OutputTimeUnit(TimeUnit.MICROSECONDS)

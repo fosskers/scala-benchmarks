@@ -6,6 +6,74 @@ An independent set of benchmarks for testing common Scala idioms.
 
 ** Results
 
+*** Functional Programming
+
+**** Folding
+
+We often want to collapse a collection into some summary of its elements.
+This is known as a /fold/, a /reduce/, or a /catamorphism/:
+
+#+BEGIN_SRC scala
+  List(1,2,3).foldLeft(0)(_ + _)  // 6
+#+END_SRC
+
+How fast is this operation in the face of the JVM's ~while~ and mutable
+variables? For instance the familiar, manual, and error-prone:
+
+#+BEGIN_SRC scala
+  var n: Int = 0
+  var i: Int = coll.length - 1
+
+  while (i >= 0) {
+    n += coll(i)
+    i -= 1
+  }
+#+END_SRC
+
+~FoldBench~ compares ~List~, ~Vector~, ~Array~, and ~Stream~ for their speeds
+in various fold operations over Ints. ~FoldClassBench~ tries these same operations over a simple
+wrapping class to see boxing/references affect things.
+
+~Int~ Results:
+
+/All times are in microseconds./
+
+| Benchmark      | List | Vector | Array |         Stream |
+|----------------+------+--------+-------+----------------+
+| ~foldLeft~     | 33.3 |   68.9 |  56.4 |           56.9 |
+| ~foldRight~    | 69.2 | 228.39 |  55.1 | Stack Overflow |
+| Tail Recursion | 45.9 |        |       |           69.8 |
+| ~sum~          | 76.9 |   71.0 |  79.0 |           74.7 |
+| ~while~        | 47.2 |   38.4 |   3.0 |           52.9 |
+
+~Pair~ Class Results:
+
+/All times are in microseconds./
+
+| Benchmark      | List | Vector | Array |         Stream |
+|----------------+------+--------+-------+----------------|
+| ~foldLeft~     | 39.5 |   70.2 |  39.9 |           68.2 |
+| ~foldRight~    | 83.6 |  242.1 |  38.8 | Stack Overflow |
+| Tail Recursion | 39.2 |        |       |           93.0 |
+| ~while~        | 39.3 |   57.8 |  36.2 |           70.1 |
+
+Conclusions:
+
+- ~foldLeft~ is always better than both ~foldRight~ and manual tail recursion for
+  catamorphisms (reduction to a single value).
+- ~sum~ should be avoided.
+- Collections with random access (especially ~Array~) benefit from ~while~
+  loops.
+- *Array has no advantage over List when holding non-primitive types!*
+
+Recommendation:
+
+#+BEGIN_QUOTE
+~List.foldLeft~ is concise and performant for both primitive and boxed types.
+If you were already dealing with an ~Array[Int]~ or likewise, then a ~while~
+loop will be faster.
+#+END_QUOTE
+
 *** Pattern Matching
 
 **** Deconstructing Containers
@@ -44,19 +112,11 @@ Results:
 
 /All times are in microseconds./
 
-| Benchmark              | Time-per-op | Error     |
-|------------------------+-------------+-----------|
-| lastArrayIf            |   16020.595 | ± 355.531 |
-| lastListIf             |      39.949 | ±   0.306 |
-| lastListMatchCons      |      42.762 | ±   7.574 |
-| lastListMatchGeneric   |      79.046 | ±  14.135 |
-| lastSeqIf              |      39.377 | ±   0.337 |
-| lastSeqMatchGeneric    |     707.352 | ±   5.664 |
-| lastStreamIf           |      55.745 | ±  15.304 |
-| lastStreamMatch        |     168.422 | ±   5.316 |
-| lastStreamMatchGeneric |     170.239 | ±   5.705 |
-| lastVectorIf           |     816.862 | ±   5.421 |
-| lastVectorMatchGeneric |    1647.463 | ±  22.291 |
+| Benchmark       | List | Vector |   Seq |   Array | Stream |
+|-----------------+------+--------+-------+---------+--------|
+| ~::~ Matching   | 42.8 |        |       |         |  168.4 |
+| ~+:~ Matching   | 79.0 | 1647.5 | 707.4 |         |  170.2 |
+| ~if~ Statements | 39.9 |  816.9 |  39.4 | 16020.6 |   55.8 |
 
 Conclusions:
 
