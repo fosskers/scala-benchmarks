@@ -1,3 +1,77 @@
-* Scala Benchmarks
+#+TITLE: Scala Benchmarks
+#+AUTHOR: Colin
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="/home/colin/code/org-theme.css"/>
 
 An independent set of benchmarks for testing common Scala idioms.
+
+** Results
+
+*** Pattern Matching
+
+**** Deconstructing Containers
+
+It's common to decontruct containers like this in recursive algorithms:
+
+#+BEGIN_SRC scala
+  def safeHead[A](s: Seq[A]): Option[A] = s match {
+    case Seq() => None
+    case h +: _ => Some(h)
+  }
+#+END_SRC
+
+But ~List~ and ~Stream~ have special "cons" operators, namely ~::~ and ~#::~
+respectively. The ~List~ version of the above looks like:
+
+#+BEGIN_SRC scala
+  def safeHead[A](l: List[A]): Option[A] = l match {
+    case Nil => None
+    case h :: _ => Some(h)
+  }
+#+END_SRC
+
+How do these operators compare? Also, is it any slower to do it this way than
+a more Java-like:
+
+#+BEGIN_SRC scala
+  def safeHead[A](l: List[A]): Option[A] =
+    if (l.isEmpty) None else l.head
+#+END_SRC
+
+The ~MatchContainersBench~ benchmarks use a tail-recursive algorithm to find
+the last element of each of ~List~, ~Vector~, ~Array~, ~Seq~, and ~Stream~.
+
+Results:
+
+/All times are in microseconds./
+
+| Benchmark              | Time-per-op | Error     |
+|------------------------+-------------+-----------|
+| lastArrayIf            |   16020.595 | ± 355.531 |
+| lastListIf             |      39.949 | ±   0.306 |
+| lastListMatchCons      |      42.762 | ±   7.574 |
+| lastListMatchGeneric   |      79.046 | ±  14.135 |
+| lastSeqIf              |      39.377 | ±   0.337 |
+| lastSeqMatchGeneric    |     707.352 | ±   5.664 |
+| lastStreamIf           |      55.745 | ±  15.304 |
+| lastStreamMatch        |     168.422 | ±   5.316 |
+| lastStreamMatchGeneric |     170.239 | ±   5.705 |
+| lastVectorIf           |     816.862 | ±   5.421 |
+| lastVectorMatchGeneric |    1647.463 | ±  22.291 |
+
+Conclusions:
+
+- ~List~ matching with ~::~ is /fast/.
+- ~Seq~ matching with ~+:~, its canonical operator, is ironically slow.
+- Pattern matching with ~+:~ should be avoided in general.
+- ~if~ is generally faster than pattern matching, but the code isn't as nice.
+- Avoid recursion with ~Vector~ and ~Array~!
+- ~Array.tail~ is pure evil. Each call incurs ~ArrayOps~ wrapping and
+  seems to reallocate the entire ~Array~. ~Vector.tail~ incurs a similar
+  slowdown, but not as drasticly.
+
+Recommendation:
+
+#+BEGIN_QUOTE
+Recursion involving containers should be done with ~List~ and pattern matching
+for the best balance of speed and simplicity.
+#+END_QUOTE
