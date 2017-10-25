@@ -32,7 +32,7 @@ variables? For instance the familiar, manual, and error-prone:
 
 ~FoldBench~ compares ~List~, ~Vector~, ~Array~, and ~Stream~ for their speeds
 in various fold operations over Ints. ~FoldClassBench~ tries these same operations over a simple
-wrapping class to see boxing/references affect things.
+wrapping class to see how boxing/references affect things.
 
 ~Int~ Results:
 
@@ -135,3 +135,43 @@ Recommendation:
 Recursion involving containers should be done with ~List~ and pattern matching
 for the best balance of speed and simplicity.
 #+END_QUOTE
+**** Guard Patterns
+
+It can sometimes be cleaner to check multiple ~Boolean~ conditions using a ~match~:
+
+#+BEGIN_SRC scala
+  def foo(i: Int): Whatever = i match {
+    case _ if bar(i) => ???
+    case _ if baz(i) => ???
+    case _ if zoo(i) => ???
+    case _ => someDefault
+  }
+#+END_SRC
+
+where we don't really care about the pattern match, just the guard.
+This is in constrast to ~if~ branches:
+
+#+BEGIN_SRC scala
+  def foo(i: Int): Whatever = {
+    if (bar(i)) ???
+    else if (baz(i)) ???
+    else if (zoo(i)) ???
+    else someDefault
+  }
+#+END_SRC
+
+which of course would often be made more verbose by many ~{}~ pairs.
+Are we punished for the empty pattern matches? ~MatchBench~ tests this, with
+various numbers of branches.
+
+Results:
+
+/All times are in nanoseconds./
+
+| Benchmark    | Guards | Ifs |
+|--------------+--------+-----|
+| 1 Condition  |    3.3 | 3.3 |
+| 2 Conditions |    3.6 | 3.6 |
+| 3 Conditions |    3.9 | 3.9 |
+
+Identical! Feel free to use whichever you think is cleaner.
