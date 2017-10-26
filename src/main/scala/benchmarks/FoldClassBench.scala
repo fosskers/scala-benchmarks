@@ -27,6 +27,22 @@ class FoldClassBench {
   }
 
   @Benchmark
+  def iterFoldLeft: Pair = list.iterator.foldLeft(Pair(0,0))(_ + _)
+  @Benchmark
+  def iterFoldRight: Pair = list.iterator.foldRight(Pair(0,0))(_ + _)
+  @Benchmark
+  def iterWhile: Pair = {
+    var n: Pair = Pair(0,0)
+    val iter: Iterator[Pair] = list.iterator
+
+    while (iter.hasNext) {
+      n = n + iter.next
+    }
+
+    n
+  }
+
+  @Benchmark
   def listFoldLeft: Pair = list.foldLeft(Pair(0,0))(_ + _)
   @Benchmark
   def listFoldRight: Pair = list.foldRight(Pair(0,0))(_ + _)

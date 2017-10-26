@@ -27,9 +27,20 @@ class FoldBench {
   }
 
   @Benchmark
-  def iterFoldLeft: Int = Iterator.range(1, 10000).foldLeft(0)(_ + _)
+  def iterFoldLeft: Int = list.iterator.foldLeft(0)(_ + _)
   @Benchmark
-  def iterFoldRight: Int = Iterator.range(1, 10000).foldRight(0)(_ + _)
+  def iterFoldRight: Int = list.iterator.foldRight(0)(_ + _)
+  @Benchmark
+  def iterWhile: Int = {
+    var n: Int = 0
+    val iter: Iterator[Int] = list.iterator
+
+    while (iter.hasNext) {
+      n += iter.next
+    }
+
+    n
+  }
 
   @Benchmark
   def listFoldLeft: Int = list.foldLeft(0)(_ + _)

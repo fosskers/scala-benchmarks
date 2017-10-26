@@ -30,7 +30,7 @@ variables? For instance the familiar, manual, and error-prone:
   }
 #+END_SRC
 
-~FoldBench~ compares ~List~, ~Vector~, ~Array~, and ~Stream~ for their speeds
+~FoldBench~ compares ~List~, ~Vector~, ~Array~, ~Stream~, and ~Iterator~ for their speeds
 in various fold operations over Ints. ~FoldClassBench~ tries these same operations over a simple
 wrapping class to see how boxing/references affect things.
 
@@ -38,30 +38,31 @@ wrapping class to see how boxing/references affect things.
 
 /All times are in microseconds./
 
-| Benchmark      | List | Vector | Array |         Stream |
-|----------------+------+--------+-------+----------------+
-| ~foldLeft~     | 33.3 |   68.9 |  56.4 |           56.9 |
-| ~foldRight~    | 69.2 | 228.39 |  55.1 | Stack Overflow |
-| Tail Recursion | 45.9 |        |       |           69.8 |
-| ~sum~          | 76.9 |   71.0 |  79.0 |           74.7 |
-| ~while~        | 47.2 |   38.4 |   3.0 |           52.9 |
+| Benchmark      | List | Vector | Array |         Stream | Iterator |
+|----------------+------+--------+-------+----------------+----------|
+| ~foldLeft~     | 33.3 |   68.9 |  56.4 |           56.9 |     55.4 |
+| ~foldRight~    | 69.2 | 228.39 |  55.1 | Stack Overflow |    147.6 |
+| Tail Recursion | 45.9 |        |       |           69.8 |          |
+| ~sum~          | 76.9 |   71.0 |  79.0 |           74.7 |          |
+| ~while~        | 47.2 |   38.4 |   3.0 |           52.9 |     45.4 |
 
 ~Pair~ Class Results:
 
 /All times are in microseconds./
 
-| Benchmark      | List | Vector | Array |         Stream |
-|----------------+------+--------+-------+----------------|
-| ~foldLeft~     | 39.5 |   70.2 |  39.9 |           68.2 |
-| ~foldRight~    | 83.6 |  242.1 |  38.8 | Stack Overflow |
-| Tail Recursion | 39.2 |        |       |           93.0 |
-| ~while~        | 39.3 |   57.8 |  36.2 |           70.1 |
+| Benchmark      | List | Vector | Array |         Stream | Iterator |
+|----------------+------+--------+-------+----------------+----------|
+| ~foldLeft~     | 39.5 |   70.2 |  39.9 |           68.2 |     65.8 |
+| ~foldRight~    | 83.6 |  242.1 |  38.8 | Stack Overflow |    157.3 |
+| Tail Recursion | 39.2 |        |       |           93.0 |          |
+| ~while~        | 39.3 |   57.8 |  36.2 |           70.1 |     39.2 |
 
 Conclusions:
 
 - ~foldLeft~ is always better than both ~foldRight~ and manual tail recursion for
   catamorphisms (reduction to a single value).
 - ~sum~ should be avoided.
+- ~Iterator~ benefits from ~while~, but not enough to beat ~List~.
 - Collections with random access (especially ~Array~) benefit from ~while~
   loops.
 - *Array has no advantage over List when holding non-primitive types!*
@@ -72,6 +73,65 @@ Recommendation:
 ~List.foldLeft~ is concise and performant for both primitive and boxed types.
 If you were already dealing with an ~Array[Int]~ or likewise, then a ~while~
 loop will be faster.
+#+END_QUOTE
+
+**** Chained Higher-Order Functions
+
+It's common to string together multiple operations over a collection, say:
+
+#+BEGIN_SRC scala
+  List(1,2,3,4).map(foo).filter(pred).map(bar)
+#+END_SRC
+
+which is certainly shorter and cleaner in its intent than manually manipulating
+a mutable collection in a ~while~ loop. Are higher-order operations like these
+still fast? People used to Haskell's list fusion might point out that these
+operations typically don't fuse in Scala, meaning that each chained operation
+fully iterates over the entire collection and allocates a new copy. ~Stream~
+and ~Iterator~ are supposed to be the exceptions, however.
+
+~Stream~ in particular is what people wanting Haskell's lazy lists may reach
+for first, on the claim that the elements memoize, chained operations fuse,
+and they support infinite streams of values. Let's see how everything performs.
+
+~StreamBench~ performs the following operations on ~List~, ~Vector~, ~Array~,
+~Stream~, and ~Iterator~. We test:
+
+- /Head/: map-filter-map-head. Which collections "short-circuit", only
+  fully processing the head and nothing else?
+- /Max/: map-filter-map-max. How quickly can each collection fully process itself?
+  Does fusion occur (esp. with ~Stream~)?
+- /Reverse/: reverse-head. Can any of the collections "cheat" and grab the last
+  element quickly?
+- /Sort/: map-filter-map-sorted-head. Does ~Stream~ still leverage laziness with
+  a "mangling" operation like sort?
+
+Results:
+
+/All times are in microseconds./
+
+| Benchmark |  List | Vector | Array | Stream | Iterator |
+|-----------+-------+--------+-------+--------+----------|
+| Head      | 182.3 |  133.2 | 206.3 |  0.065 |    0.023 |
+| Max       | 198.9 |  263.5 | 192.7 |  863.7 |    139.7 |
+| Reverse   |  37.8 |  146.7 |  45.6 |  371.6 |          |
+| Sort      | 309.1 |  277.8 | 289.4 | 1482.8 |          |
+
+Conclusions:
+
+- ~Stream~ won't do work it doesn't have to, as advertised (re: /Head/).
+- ~Stream~ is very slow to fully evaluate, implying no operation fusion.
+  Nothing clever happens with sorting.
+- ~Iterator~ overall is the fastest collection to chain higher-order
+  functions.
+- ~List~ has the fastest ~reverse~.
+
+Recommendation:
+
+#+BEGIN_QUOTE
+If you want to chain higher-order operations in Scala, use an ~Iterator~.
+If you have something like a ~List~ instead, create an ~Iterator~ first
+with ~.iterator~ before you chain.
 #+END_QUOTE
 
 *** Pattern Matching
