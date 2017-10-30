@@ -134,6 +134,41 @@ If you have something like a ~List~ instead, create an ~Iterator~ first
 with ~.iterator~ before you chain.
 #+END_QUOTE
 
+*** Mutable Data
+
+**** ~List~ and ~ListBuffer~
+
+Say you want to iterate over some collection and build up a new one. For whatever reason
+~.map~ and ~.foldLeft~ aren't enough. Which of these approaches is faster, then?
+
+- ~while~ looping over an ~Array~, appending each result to a mutable ~ListBuffer~?
+- Tail recursion over a ~List~, pattern matching, and List's ~::~?
+
+~AccumBench~ tests these two approaches.
+
+Results:
+
+/All times are in microseconds./
+
+| Benchmark | ~Array => ListBuffer~ | ~List => List~ | ~Array => List~ |
+| Ints      |                 619.9 |           58.9 |           191.4 |
+| Classes   |                 610.9 |           38.6 |           138.6 |
+
+Conclusions:
+
+- The ~ListBuffer.append~ calls seem to dominate any advantage ~while~ looping
+  would have had.
+- Lists are fast. Oddly faster on classes, rather than on primitives.
+
+Recommendation:
+
+#+BEGIN_QUOTE
+Avoid ~ListBuffer~ - idiomatic tail recursive code will be cleaner and faster.
+If you started with ~Array~ and can't change that, consider ~Array.toList~ before
+continuing. The ~Array.toList~ call is still cheaper than the accumulated
+~ListBuffer.append~ calls.
+#+END_QUOTE
+
 *** Pattern Matching
 
 **** Deconstructing Containers
