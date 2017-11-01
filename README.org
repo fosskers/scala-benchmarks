@@ -169,6 +169,46 @@ continuing. The ~Array.toList~ call is still cheaper than the accumulated
 ~ListBuffer.append~ calls.
 #+END_QUOTE
 
+**** Mutable ~Set~ and Java's ~ConcurrentHashMap~
+
+You'd like to build up a unique set of values and for some reason calling ~.toSet~
+on your original collection isn't enough. Perhaps you don't have an original collection.
+Scala's collections have been criticized for their performance, with one famous complaint
+saying how their team had to fallback to using Java collection types entirely because
+the Scala ones couldn't compare (that was for Scala 2.8, mind you).
+
+Is this true? ~UniquesBench~ compares both of Scala's mutable and immutable ~Set~ types with
+Java's ~ConcurrentHashMap~ to see which can accumulate unique values faster.
+
+Results:
+
+/All values are in microseconds./
+
+| Benchmark    | ~mutable.Set~ | ~immutable.Set~ | Java ~ConcurrentHashMap~ |
+|--------------+---------------+-----------------+--------------------------|
+| 100 values   |           4.6 |             7.7 |                      6.1 |
+| 1000 values  |          62.2 |           107.4 |                     71.3 |
+| 10000 values |        811.1* |          1290.4 |                    777.1 |
+
+*Note*: About half the time the 10000-value benchmark for ~mutable.Set~ optimizes
+down to ~600us instead of the ~800us shown in the chart.
+
+Conclusions:
+
+- ~mutable.Set~ is fastest at least for small amounts of data, and /might/ be
+  fastest at scale.
+- ~immutable.Set~ is slower and has worse growth, as expected.
+
+Recommendation:
+
+#+BEGIN_QUOTE
+First consider whether your algorithm can't be rewritten in terms of the usual
+FP idioms, followed by a ~.toSet~ call to make the collection unique.
+
+If that isn't possible, then trust in the performance of native Scala collections
+and use ~mutable.Set~.
+#+END_QUOTE
+
 *** Pattern Matching
 
 **** Deconstructing Containers
