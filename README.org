@@ -175,37 +175,56 @@ and comparitively performant if you stick to immutable collections and chained
 higher-order functions.
 #+END_QUOTE
 
-**** ~List~ and ~ListBuffer~
+**** ~*Builder~ Classes
 
-Say you want to iterate over some collection and build up a new one. For whatever reason
-~.map~ and ~.foldLeft~ aren't enough. Which of these approaches is faster, then?
-
-- ~while~ looping over an ~Array~, appending each result to a mutable ~ListBuffer~?
-- Tail recursion over a ~List~, pattern matching, and List's ~::~?
-
-~AccumBench~ tests these two approaches.
+You want to build up a new collection, perhaps iterating over an existing one,
+perhaps from some live, dynamic process. For whatever reason ~.map~ and ~.foldLeft~
+are not an option. Which collection is best for this?
+~VectorBench~ tests how fast each of ~List~, ~ListBuffer~, ~Vector~, ~VectorBuilder~,
+~Array~, ~ArrayBuilder~, and ~IndexedSeq~ can create themselves and
+accumulate values. For ~List~, this is done with tail recursion. For ~IndexedSeq~,
+this is done via a naive for-comprehension. For all others,
+this is done with ~while~ loops. The ~Buffer~ and ~Builder~ classes perform a
+~.result~ call at the end of iterating to take their non-builder forms (i.e.
+~VectorBuilder => Vector~).
 
 Results:
 
 /All times are in microseconds./
 
-| Benchmark | ~Array => ListBuffer~ | ~List => List~ | ~Array => List~ |
-| Ints      |                 619.9 |           58.9 |           191.4 |
-| Classes   |                 610.9 |           38.6 |           138.6 |
+| Benchmark      | ~List~ | ~ListBuffer~ | ~Vector~ | ~VectorBuilder~ | ~Array~ | ~ArrayBuilder~ | ~IndexedSeq~ |
+|----------------+--------+--------------+----------+-----------------+---------+----------------+--------------|
+| 1000 Ints      |    5.7 |         88.5 |     20.8 |             6.6 |     0.6 |            4.0 |          5.9 |
+| 10000 Ints     |   60.2 |        835.4 |    206.1 |            39.0 |     5.3 |           29.7 |         61.4 |
+| 100000 Ints    |  545.1 |       9003.6 |   2091.2 |           384.3 |    53.3 |          412.9 |        615.3 |
+| 1000 Classes   |    6.2 |         88.9 |     21.5 |             6.3 |     3.8 |            4.9 |          6.4 |
+| 10000 Classes  |   64.4 |        844.9 |    214.3 |            44.7 |    41.4 |           53.1 |         65.4 |
+| 100000 Classes |  592.0 |       8894.3 |   2164.7 |           429.4 |   357.0 |          523.5 |        653.3 |
 
 Conclusions:
 
-- The ~ListBuffer.append~ calls seem to dominate any advantage ~while~ looping
-  would have had.
-- Lists are fast. Oddly faster on classes, rather than on primitives.
+- For primitives, ~Array~ is king.
+- *Avoid appending to immutable Vectors.*
+- *Avoid ListBuffer, period.*
+- For classes, at small scales (~1000 elements) there is mostly no difference between
+  the various approaches.
+- I'm not sure what the point of ~ArrayBuilder~ is.
+- ~VectorBuilder~ fulfills the promise of Builders.
 
 Recommendation:
 
 #+BEGIN_QUOTE
-Avoid ~ListBuffer~ - idiomatic tail recursive code will be cleaner and faster.
-If you started with ~Array~ and can't change that, consider ~Array.toList~ before
-continuing. The ~Array.toList~ call is still cheaper than the accumulated
-~ListBuffer.append~ calls.
+The best choice here depends on what your next step is.
+
+If you plan to perform ~while~ -based numeric calculations over primitives only,
+stick to ~Array~.
+
+Otherwise, consider whether your algorithm can't be reexpressed entirely in terms
+of ~Iterator~. This will always give the best performance for subsequent chained,
+higher-order functions.
+
+If the algorithm can't be expressed in terms of ~Iterator~ from the get-go, try building
+your collection with ~VectorBuilder~, call ~.iterator~ once filled, then continue.
 #+END_QUOTE
 
 **** Mutable ~Set~ and Java's ~ConcurrentHashMap~
