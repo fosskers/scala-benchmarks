@@ -5,6 +5,7 @@ import java.util.concurrent.TimeUnit
 import scala.annotation.tailrec
 
 import org.openjdk.jmh.annotations._
+import scalaz.{IList, ICons, INil}
 
 // --- //
 
@@ -14,6 +15,7 @@ import org.openjdk.jmh.annotations._
 class MatchContainersBench {
 
   var list: List[Int] = _
+  var ilist: IList[Int] = _
   var vec: Vector[Int] = _
   var arr: Array[Int] = _
   var seq: Seq[Int] = _
@@ -22,6 +24,7 @@ class MatchContainersBench {
   @Setup
   def setup: Unit = {
     list = List.range(1, 10000)
+    ilist = IList.fromList(list)
     vec = Vector.range(1, 10000)
     arr = Array.range(1, 10000)
     seq = Seq.range(1, 10000)
@@ -63,6 +66,17 @@ class MatchContainersBench {
     }
 
     work(list)
+  }
+
+  @Benchmark
+  def lastIListMatchCons: Option[Int] = {
+    @tailrec def work(l: IList[Int]): Option[Int] = l match {
+      case INil()           => None
+      case ICons(h, INil()) => Some(h)
+      case ICons(_, rest)   => work(rest)
+    }
+
+    work(ilist)
   }
 
   @Benchmark

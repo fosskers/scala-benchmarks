@@ -5,6 +5,7 @@ import java.util.concurrent.TimeUnit
 import scala.annotation.tailrec
 
 import org.openjdk.jmh.annotations._
+import scalaz.{IList, ICons, INil}
 
 // --- //
 
@@ -14,6 +15,7 @@ import org.openjdk.jmh.annotations._
 class FoldClassBench {
 
   var list: List[Pair] = _
+  var ilist: IList[Pair] = _
   var vector: Vector[Pair] = _
   var array: Array[Pair] = _
   var stream: Stream[Pair] = _
@@ -21,6 +23,7 @@ class FoldClassBench {
   @Setup
   def setup: Unit = {
     list = List.range(1, 10000).map(n => Pair(n, n))
+    ilist = IList.fromList(list)
     vector = Vector.range(1, 10000).map(n => Pair(n, n))
     array = Array.range(1, 10000).map(n => Pair(n, n))
     stream = Stream.range(1, 10000).map(n => Pair(n, n))
@@ -66,6 +69,20 @@ class FoldClassBench {
     }
 
     i
+  }
+
+  @Benchmark
+  def ilistFoldLeft: Pair = ilist.foldLeft(Pair(0,0))(_ + _)
+  @Benchmark
+  def ilistFoldRight: Pair = ilist.foldRight(Pair(0,0))(_ + _)
+  @Benchmark
+  def ilistTailrec: Pair = {
+    @tailrec def work(l: IList[Pair], acc: Pair): Pair = l match {
+      case ICons(h, tail) => work(tail, h + acc)
+      case INil() => acc
+    }
+
+    work(ilist, Pair(0,0))
   }
 
   @Benchmark

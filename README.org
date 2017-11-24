@@ -30,7 +30,7 @@ variables? For instance the familiar, manual, and error-prone:
   }
 #+END_SRC
 
-~FoldBench~ compares ~List~, ~Vector~, ~Array~, ~Stream~, and ~Iterator~ for their speeds
+~FoldBench~ compares ~List~, ~scalaz.IList~, ~Vector~, ~Array~, ~Stream~, and ~Iterator~ for their speeds
 in various fold operations over Ints. ~FoldClassBench~ tries these same operations over a simple
 wrapping class to see how boxing/references affect things.
 
@@ -38,24 +38,24 @@ wrapping class to see how boxing/references affect things.
 
 /All times are in microseconds./
 
-| Benchmark      | List | Vector | Array |         Stream | Iterator |
-|----------------+------+--------+-------+----------------+----------|
-| ~foldLeft~     | 33.3 |   68.9 |  56.4 |           56.9 |     55.4 |
-| ~foldRight~    | 69.2 | 228.39 |  55.1 | Stack Overflow |    147.6 |
-| Tail Recursion | 45.9 |        |       |           69.8 |          |
-| ~sum~          | 76.9 |   71.0 |  79.0 |           74.7 |          |
-| ~while~        | 47.2 |   38.4 |   3.0 |           52.9 |     45.4 |
+| Benchmark      | List | IList | Vector | Array |         Stream | Iterator |
+|----------------+------+-------+--------+-------+----------------+----------|
+| ~foldLeft~     | 33.3 | 31.3  |   68.9 |  56.4 |           56.9 |     55.4 |
+| ~foldRight~    | 69.2 | 89.5  | 228.39 |  55.1 | Stack Overflow |    147.6 |
+| Tail Recursion | 45.9 | 24.1  |        |       |           69.8 |          |
+| ~sum~          | 76.9 |       |   71.0 |  79.0 |           74.7 |          |
+| ~while~        | 47.2 |       |   38.4 |   3.0 |           52.9 |     45.4 |
 
 ~Pair~ Class Results:
 
 /All times are in microseconds./
 
-| Benchmark      | List | Vector | Array |         Stream | Iterator |
-|----------------+------+--------+-------+----------------+----------|
-| ~foldLeft~     | 39.5 |   70.2 |  39.9 |           68.2 |     65.8 |
-| ~foldRight~    | 83.6 |  242.1 |  38.8 | Stack Overflow |    157.3 |
-| Tail Recursion | 39.2 |        |       |           93.0 |          |
-| ~while~        | 39.3 |   57.8 |  36.2 |           70.1 |     39.2 |
+| Benchmark      | List | IList | Vector | Array |         Stream | Iterator |
+|----------------+------+-------+--------+-------+----------------+----------|
+| ~foldLeft~     | 39.5 | 37.5  |   70.2 |  39.9 |           68.2 |     65.8 |
+| ~foldRight~    | 83.6 | 98.1  |  242.1 |  38.8 | Stack Overflow |    157.3 |
+| Tail Recursion | 39.2 | 37.9  |        |       |           93.0 |          |
+| ~while~        | 39.3 |       |   57.8 |  36.2 |           70.1 |     39.2 |
 
 Conclusions:
 
@@ -94,8 +94,8 @@ and ~Iterator~ are supposed to be the exceptions, however.
 for first, on the claim that the elements memoize, chained operations fuse,
 and they support infinite streams of values. Let's see how everything performs.
 
-~StreamBench~ performs the following operations on ~List~, ~Vector~, ~Array~,
-~Stream~, and ~Iterator~. We test:
+~StreamBench~ performs the following operations on ~List~, ~scalaz.IList~,
+~Vector~, ~Array~, ~Stream~, ~scalaz.EphemeralStream~ and ~Iterator~. We test:
 
 - /Head/: map-filter-map-head. Which collections "short-circuit", only
   fully processing the head and nothing else?
@@ -110,12 +110,12 @@ Results:
 
 /All times are in microseconds./
 
-| Benchmark |  List | Vector | Array | Stream | Iterator |
-|-----------+-------+--------+-------+--------+----------|
-| Head      | 182.3 |  133.2 | 206.3 |  0.065 |    0.023 |
-| Max       | 198.9 |  263.5 | 192.7 |  863.7 |    139.7 |
-| Reverse   |  37.8 |  146.7 |  45.6 |  371.6 |          |
-| Sort      | 309.1 |  277.8 | 289.4 | 1482.8 |          |
+| Benchmark |  List | IList | Vector | Array | Stream | EStream | Iterator |
+|-----------+-------+-------+--------+-------+--------+---------+----------|
+| Head      | 182.3 | 260.2 |  133.2 | 206.3 |  0.065 |    0.17 |    0.023 |
+| Max       | 198.9 | 389.9 |  263.5 | 192.7 |  863.7 |  1714.4 |    139.7 |
+| Reverse   |  37.8 |  49.2 |  146.7 |  45.6 |  371.6 |   448.5 |          |
+| Sort      | 309.1 | 554.9 |  277.8 | 289.4 | 1482.8 |         |          |
 
 Conclusions:
 
@@ -299,21 +299,21 @@ a more Java-like:
 #+END_SRC
 
 The ~MatchContainersBench~ benchmarks use a tail-recursive algorithm to find
-the last element of each of ~List~, ~Vector~, ~Array~, ~Seq~, and ~Stream~.
+the last element of each of ~List~, ~scalaz.IList~, ~Vector~, ~Array~, ~Seq~, and ~Stream~.
 
 Results:
 
 /All times are in microseconds./
 
-| Benchmark       | List | Vector |   Seq |   Array | Stream |
-|-----------------+------+--------+-------+---------+--------|
-| ~::~ Matching   | 42.8 |        |       |         |  168.4 |
-| ~+:~ Matching   | 79.0 | 1647.5 | 707.4 |         |  170.2 |
-| ~if~ Statements | 39.9 |  816.9 |  39.4 | 16020.6 |   55.8 |
+| Benchmark       | List | IList | Vector |   Seq |   Array | Stream |
+|-----------------+------+-------+--------+-------+---------+--------|
+| ~::~ Matching   | 42.8 | 23.6  |        |       |         |  168.4 |
+| ~+:~ Matching   | 79.0 |       | 1647.5 | 707.4 |         |  170.2 |
+| ~if~ Statements | 39.9 |       |  816.9 |  39.4 | 16020.6 |   55.8 |
 
 Conclusions:
 
-- ~List~ matching with ~::~ is /fast/.
+- Canonical ~List~ and ~IList~ matching is /fast/.
 - ~Seq~ matching with ~+:~, its canonical operator, is ironically slow.
 - Pattern matching with ~+:~ should be avoided in general.
 - ~if~ is generally faster than pattern matching, but the code isn't as nice.
@@ -326,7 +326,8 @@ Recommendation:
 
 #+BEGIN_QUOTE
 Recursion involving containers should be done with ~List~ and pattern matching
-for the best balance of speed and simplicity.
+for the best balance of speed and simplicity. If you can take ~scalaz~ as a
+dependency, its ~IList~ will be even faster.
 #+END_QUOTE
 **** Guard Patterns
 
