@@ -7,6 +7,7 @@ import scala.collection.immutable.VectorBuilder
 import scala.collection.mutable.{ArrayBuilder, ListBuffer}
 
 import org.openjdk.jmh.annotations._
+import scalaz.{IList, ICons, INil}
 
 // --- //
 
@@ -73,6 +74,16 @@ class AccumClassBench {
     work(Nil, 0)
   }
 
+  def ilist(n: Int): IList[Pair] = {
+
+    @tailrec def work(acc: IList[Pair], m: Int): IList[Pair] = m match {
+      case _ if m == n => acc
+      case _ => work(ICons(Pair(m, m), acc), m + 1)
+    }
+
+    work(INil(), 0)
+  }
+
   def buffer(n: Int): List[Pair] = {
     val b = new ListBuffer[Pair]
     var i: Int = 0
@@ -121,6 +132,13 @@ class AccumClassBench {
   def list10000: List[Pair] = list(10000)
   @Benchmark
   def list100000: List[Pair] = list(100000)
+
+  @Benchmark
+  def ilist1000: IList[Pair] = ilist(1000)
+  @Benchmark
+  def ilist10000: IList[Pair] = ilist(10000)
+  @Benchmark
+  def ilist100000: IList[Pair] = ilist(100000)
 
   @Benchmark
   def buffer1000: List[Pair] = buffer(1000)

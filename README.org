@@ -180,7 +180,7 @@ higher-order functions.
 You want to build up a new collection, perhaps iterating over an existing one,
 perhaps from some live, dynamic process. For whatever reason ~.map~ and ~.foldLeft~
 are not an option. Which collection is best for this?
-~VectorBench~ tests how fast each of ~List~, ~ListBuffer~, ~Vector~, ~VectorBuilder~,
+~VectorBench~ tests how fast each of ~List~, ~scalaz.IList~, ~ListBuffer~, ~Vector~, ~VectorBuilder~,
 ~Array~, ~ArrayBuilder~, and ~IndexedSeq~ can create themselves and
 accumulate values. For ~List~, this is done with tail recursion. For ~IndexedSeq~,
 this is done via a naive for-comprehension. For all others,
@@ -192,14 +192,14 @@ Results:
 
 /All times are in microseconds./
 
-| Benchmark      | ~List~ | ~ListBuffer~ | ~Vector~ | ~VectorBuilder~ | ~Array~ | ~ArrayBuilder~ | ~IndexedSeq~ |
-|----------------+--------+--------------+----------+-----------------+---------+----------------+--------------|
-| 1000 Ints      |    5.7 |         88.5 |     20.8 |             6.6 |     0.6 |            4.0 |          5.9 |
-| 10000 Ints     |   60.2 |        835.4 |    206.1 |            39.0 |     5.3 |           29.7 |         61.4 |
-| 100000 Ints    |  545.1 |       9003.6 |   2091.2 |           384.3 |    53.3 |          412.9 |        615.3 |
-| 1000 Classes   |    6.2 |         88.9 |     21.5 |             6.3 |     3.8 |            4.9 |          6.4 |
-| 10000 Classes  |   64.4 |        844.9 |    214.3 |            44.7 |    41.4 |           53.1 |         65.4 |
-| 100000 Classes |  592.0 |       8894.3 |   2164.7 |           429.4 |   357.0 |          523.5 |        653.3 |
+| Benchmark      | ~List~ | ~IList~ | ~ListBuffer~ | ~Vector~ | ~VectorBuilder~ | ~Array~ | ~ArrayBuilder~ | ~IndexedSeq~ |
+|----------------+--------+---------+--------------+----------+-----------------+---------+----------------+--------------|
+| 1000 Ints      |    5.7 |     5.5 |         88.5 |     20.8 |             6.6 |     0.6 |            4.0 |          5.9 |
+| 10000 Ints     |   60.2 |    57.1 |        835.4 |    206.1 |            39.0 |     5.3 |           29.7 |         61.4 |
+| 100000 Ints    |  545.1 |   547.4 |       9003.6 |   2091.2 |           384.3 |    53.3 |          412.9 |        615.3 |
+| 1000 Classes   |    6.2 |     6.2 |         88.9 |     21.5 |             6.3 |     3.8 |            4.9 |          6.4 |
+| 10000 Classes  |   64.4 |    62.4 |        844.9 |    214.3 |            44.7 |    41.4 |           53.1 |         65.4 |
+| 100000 Classes |  592.0 |   600.3 |       8894.3 |   2164.7 |           429.4 |   357.0 |          523.5 |        653.3 |
 
 Conclusions:
 

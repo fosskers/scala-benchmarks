@@ -7,6 +7,7 @@ import scala.collection.immutable.VectorBuilder
 import scala.collection.mutable.{ArrayBuilder, ListBuffer}
 
 import org.openjdk.jmh.annotations._
+import scalaz.{IList, ICons, INil}
 
 // --- //
 
@@ -73,6 +74,17 @@ class VectorBench {
     work(Nil, 0)
   }
 
+  def ilist(n: Int): IList[Int] = {
+
+    @tailrec def work(acc: IList[Int], m: Int): IList[Int] = m match {
+      case _ if m == n => acc
+      case _ => work(ICons(m, acc), m + 1)
+    }
+
+    work(INil(), 0)
+
+  }
+
   def buffer(n: Int): List[Int] = {
     val b = new ListBuffer[Int]
     var i: Int = 0
@@ -121,6 +133,13 @@ class VectorBench {
   def list10000: List[Int] = list(10000)
   @Benchmark
   def list100000: List[Int] = list(100000)
+
+  @Benchmark
+  def ilist1000: IList[Int] = ilist(1000)
+  @Benchmark
+  def ilist10000: IList[Int] = ilist(10000)
+  @Benchmark
+  def ilist100000: IList[Int] = ilist(100000)
 
   @Benchmark
   def buffer1000: List[Int] = buffer(1000)
