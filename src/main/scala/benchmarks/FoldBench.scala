@@ -5,7 +5,7 @@ import java.util.concurrent.TimeUnit
 import scala.annotation.tailrec
 
 import org.openjdk.jmh.annotations._
-import scalaz.{IList, ICons, INil}
+import scalaz.{IList, ICons, INil, EphemeralStream => EStream}
 
 // --- //
 
@@ -19,6 +19,7 @@ class FoldBench {
   var vector: Vector[Int] = _
   var array: Array[Int] = _
   var stream: Stream[Int] = _
+  var estream: EStream[Int] = _
 
   @Setup
   def setup: Unit = {
@@ -27,6 +28,7 @@ class FoldBench {
     vector = Vector.range(1, 10000)
     array = Array.range(1, 10000)
     stream = Stream.range(1, 10000)
+    estream = EStream.range(1, 10000)
   }
 
   @Benchmark
@@ -153,4 +155,8 @@ class FoldBench {
   @Benchmark
   def streamSum: Int = stream.sum
 
+  @Benchmark
+  def estreamFoldLeft: Int = estream.foldLeft(0) { acc => { n => acc + n } }
+  @Benchmark
+  def estreamFoldRight: Int = estream.foldRight(0) { n => { acc => n + acc } }
 }
