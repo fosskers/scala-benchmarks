@@ -2,8 +2,7 @@ package benchmarks
 
 import java.util.concurrent.{ TimeUnit, ConcurrentHashMap }
 
-import scala.collection.mutable.{ Set => MSet, HashSet => MHashSet }
-import scala.collection.JavaConverters._
+import scala.collection.mutable.{ Set => MSet }
 
 import org.openjdk.jmh.annotations._
 
@@ -40,7 +39,7 @@ class UniquesBench {
     while (i < len) {
       val n = arr(i)
 
-      c.put((n, n), Unit)
+      c.put((n, n), ())
       i += 1
     }
 
