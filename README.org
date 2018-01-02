@@ -38,13 +38,13 @@ wrapping class to see how boxing/references affect things.
 
 /All times are in microseconds./
 
-| Benchmark      | List | IList | Vector | Array |         Stream | Iterator |
-|----------------+------+-------+--------+-------+----------------+----------|
-| ~foldLeft~     | 33.3 | 31.3  |   68.9 |  56.4 |           56.9 |     55.4 |
-| ~foldRight~    | 69.2 | 89.5  | 228.39 |  55.1 | Stack Overflow |    147.6 |
-| Tail Recursion | 45.9 | 24.1  |        |       |           69.8 |          |
-| ~sum~          | 76.9 |       |   71.0 |  79.0 |           74.7 |          |
-| ~while~        | 47.2 |       |   38.4 |   3.0 |           52.9 |     45.4 |
+| Benchmark      | List | IList | Vector | Array |         Stream | EStream        | Iterator |
+|----------------+------+-------+--------+-------+----------------+----------------+----------|
+| ~foldLeft~     | 33.3 |  31.3 |   68.9 |  56.4 |           56.9 | 163.1          |     55.4 |
+| ~foldRight~    | 69.2 |  89.5 | 228.39 |  55.1 | Stack Overflow | Stack Overflow |    147.6 |
+| Tail Recursion | 45.9 |  24.1 |        |       |           69.8 |                |          |
+| ~sum~          | 76.9 |       |   71.0 |  79.0 |           74.7 |                |          |
+| ~while~        | 47.2 |       |   38.4 |   3.0 |           52.9 |                |     45.4 |
 
 ~Pair~ Class Results:
 
@@ -194,22 +194,23 @@ Results:
 
 | Benchmark      | ~List~ | ~IList~ | ~ListBuffer~ | ~Vector~ | ~VectorBuilder~ | ~Array~ | ~ArrayBuilder~ | ~IndexedSeq~ |
 |----------------+--------+---------+--------------+----------+-----------------+---------+----------------+--------------|
-| 1000 Ints      |    5.7 |     5.5 |         88.5 |     20.8 |             6.6 |     0.6 |            4.0 |          5.9 |
-| 10000 Ints     |   60.2 |    57.1 |        835.4 |    206.1 |            39.0 |     5.3 |           29.7 |         61.4 |
-| 100000 Ints    |  545.1 |   547.4 |       9003.6 |   2091.2 |           384.3 |    53.3 |          412.9 |        615.3 |
-| 1000 Classes   |    6.2 |     6.2 |         88.9 |     21.5 |             6.3 |     3.8 |            4.9 |          6.4 |
-| 10000 Classes  |   64.4 |    62.4 |        844.9 |    214.3 |            44.7 |    41.4 |           53.1 |         65.4 |
-| 100000 Classes |  592.0 |   600.3 |       8894.3 |   2164.7 |           429.4 |   357.0 |          523.5 |        653.3 |
+| 1000 Ints      |    5.7 |     5.5 |          5.5 |     20.8 |             6.6 |     0.6 |            4.0 |          5.9 |
+| 10000 Ints     |   60.2 |    57.1 |         57.9 |    206.1 |            39.0 |     5.3 |           29.7 |         61.4 |
+| 100000 Ints    |  545.1 |   529.1 |        551.6 |   2091.2 |           384.3 |    53.3 |          412.9 |        615.3 |
+| 1000 Classes   |    6.2 |     6.2 |          7.2 |     21.5 |             6.3 |     3.8 |            4.9 |          6.4 |
+| 10000 Classes  |   64.4 |    62.4 |         68.5 |    214.3 |            44.7 |    41.4 |           53.1 |         65.4 |
+| 100000 Classes |  592.0 |   600.3 |        611.6 |   2164.7 |           429.4 |   357.0 |          523.5 |        653.3 |
 
 Conclusions:
 
 - For primitives, ~Array~ is king.
 - *Avoid appending to immutable Vectors.*
-- *Avoid ListBuffer, period.*
+- *Avoid repeated use of ListBuffer.prepend!* Your runtime will slow by an order of magnitude vs ~+=:~.
 - For classes, at small scales (~1000 elements) there is mostly no difference between
   the various approaches.
 - I'm not sure what the point of ~ArrayBuilder~ is.
-- ~VectorBuilder~ fulfills the promise of Builders.
+- ~VectorBuilder~ fulfills the promise of Builders, but can only append to the right.
+  You'd have to deal with the fact that your elements are reversed.
 
 Recommendation:
 

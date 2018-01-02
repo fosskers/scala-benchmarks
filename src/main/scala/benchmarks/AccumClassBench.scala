@@ -89,7 +89,7 @@ class AccumClassBench {
     var i: Int = 0
 
     while (i < n) {
-      b.prepend(Pair(i, i))
+      Pair(i, i) +=: b
       i += 1
     }
 

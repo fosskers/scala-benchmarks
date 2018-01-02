@@ -90,7 +90,7 @@ class VectorBench {
     var i: Int = 0
 
     while (i < n) {
-      b.prepend(i)
+      i +=: b
       i += 1
     }
 
