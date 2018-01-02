@@ -5,6 +5,8 @@ version := "1.0.0"
 scalaVersion := "2.12.4"
 
 scalacOptions := Seq(
+  "-opt:l:inline",
+  "-opt-inline-from:**",
   "-deprecation",
   "-Ypartial-unification",
   "-Ywarn-value-discard",

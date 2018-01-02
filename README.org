@@ -36,26 +36,27 @@ wrapping class to see how boxing/references affect things.
 
 ~Int~ Results:
 
-/All times are in microseconds./
+/All times are in microseconds. Entries marked with an asterisk are sped up by
+optimization flags. Entries marked with two are slowed down by them./
 
-| Benchmark      | List | IList | Vector | Array |         Stream | EStream        | Iterator |
-|----------------+------+-------+--------+-------+----------------+----------------+----------|
-| ~foldLeft~     | 33.3 |  31.3 |   68.9 |  56.4 |           56.9 | 163.1          |     55.4 |
-| ~foldRight~    | 69.2 |  89.5 | 228.39 |  55.1 | Stack Overflow | Stack Overflow |    147.6 |
-| Tail Recursion | 45.9 |  24.1 |        |       |           69.8 |                |          |
-| ~sum~          | 76.9 |       |   71.0 |  79.0 |           74.7 |                |          |
-| ~while~        | 47.2 |       |   38.4 |   3.0 |           52.9 |                |     45.4 |
+| Benchmark      |   List | IList | Vector | Array |         Stream | EStream        | Iterator |
+|----------------+--------+-------+--------+-------+----------------+----------------+----------|
+| ~foldLeft~     | 44.1** |  31.3 |   63.5 | 34.0* |           56.9 | 180.3**        |     55.4 |
+| ~foldRight~    |   69.2 |  81.9 | 137.9* | 36.3* | Stack Overflow | Stack Overflow |    147.6 |
+| Tail Recursion |   45.9 |  24.1 |        |       |           69.8 |                |          |
+| ~sum~          |   76.9 |       |   71.0 | 79.0  |           74.7 |                |          |
+| ~while~        |   44.0 |       |   38.4 | 3.0   |           52.9 |                |     45.4 |
 
 ~Pair~ Class Results:
 
 /All times are in microseconds./
 
-| Benchmark      | List | IList | Vector | Array |         Stream | Iterator |
+| Benchmark      | List | IList | Vector | Array | Stream         | Iterator |
 |----------------+------+-------+--------+-------+----------------+----------|
-| ~foldLeft~     | 39.5 | 37.5  |   70.2 |  39.9 |           68.2 |     65.8 |
-| ~foldRight~    | 83.6 | 98.1  |  242.1 |  38.8 | Stack Overflow |    157.3 |
-| Tail Recursion | 39.2 | 37.9  |        |       |           93.0 |          |
-| ~while~        | 39.3 |       |   57.8 |  36.2 |           70.1 |     39.2 |
+| ~foldLeft~     | 39.5 |  37.5 |   70.2 |  39.9 | 68.2           |     65.8 |
+| ~foldRight~    | 83.6 |  98.1 |  242.1 |  38.8 | Stack Overflow |    157.3 |
+| Tail Recursion | 39.2 |  37.9 |        |       | 118.6**        |          |
+| ~while~        | 39.3 |       |   57.8 |  36.2 | 70.1           |     39.2 |
 
 Conclusions:
 
@@ -112,10 +113,10 @@ Results:
 
 | Benchmark |  List | IList | Vector | Array | Stream | EStream | Iterator |
 |-----------+-------+-------+--------+-------+--------+---------+----------|
-| Head      | 182.3 | 260.2 |  133.2 | 206.3 |  0.065 |    0.17 |    0.023 |
-| Max       | 198.9 | 389.9 |  263.5 | 192.7 |  863.7 |  1714.4 |    139.7 |
+| Head      | 182.3 | 273.2 |  133.2 | 206.3 |  0.065 |    0.17 |    0.023 |
+| Max       | 198.9 | 401.7 |  263.5 | 192.7 |  863.7 |  1714.4 |    139.7 |
 | Reverse   |  37.8 |  49.2 |  146.7 |  45.6 |  371.6 |   448.5 |          |
-| Sort      | 309.1 | 554.9 |  277.8 | 289.4 | 1482.8 |         |          |
+| Sort      | 327.5 | 607.6 |  277.8 | 289.4 | 1482.8 |         |          |
 
 Conclusions:
 
