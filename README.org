@@ -137,14 +137,14 @@ with ~.iterator~ before you chain.
 
 *** Mutable Data
 
-**** ~List~ and ~Array~
+**** ~List~, ~IList~ and ~Array~
 
 Above we saw that ~List~ performs strongly against ~Array~ when it comes
 to chaining multiple higher-order functions together. What happens when
 we just need to make a single transformation pass over our collection -
 in other words, a ~.map~? ~Array~ with a ~while~ loop is supposed to be
-the fastest iterating operation on the JVM. Can ~List~ still stand up
-to it?
+the fastest iterating operation on the JVM. Can ~List~ and ~IList~ still
+stand up to it?
 
 ~MapBench~ compares these operations over increasing larger collection sizes
 of both ~Int~ and a simple wrapper class.
@@ -153,14 +153,15 @@ Results:
 
 /All times are in microseconds./
 
-| Benchmark     | ~List.map~ | ~Array~ + ~while~ |
-|---------------+------------+-------------------|
-| 100 Ints      |       0.94 |              0.05 |
-| 1000 Ints     |       9.57 |              0.45 |
-| 10000 Ints    |      82.03 |              4.08 |
-| 100 Classes   |        1.0 |              0.52 |
-| 1000 Classes  |       10.3 |              5.36 |
-| 10000 Classes |      100.8 |             54.50 |
+| Benchmark     | ~List.map~ | ~IList.map~ | ~Array~ + ~while~ |
+|---------------+------------+-------------+-------------------|
+| 100 Ints      |       0.77 |        1.44 |              0.05 |
+| 1000 Ints     |        7.8 |        14.4 |              0.45 |
+| 10000 Ints    |       71.6 |       176.2 |               3.7 |
+|---------------+------------+-------------+-------------------|
+| 100 Classes   |       0.83 |        1.44 |               0.4 |
+| 1000 Classes  |        8.6 |        14.4 |               4.3 |
+| 10000 Classes |       81.3 |       181.4 |              46.7 |
 
 Conclusions:
 
