@@ -235,9 +235,9 @@ Results:
 
 | Benchmark      | ~List~ | ~IList~ | ~ListBuffer~ | ~Vector~ | ~VectorBuilder~ | ~Array~ | ~ArrayBuilder~ | ~IndexedSeq~ |
 |----------------+--------+---------+--------------+----------+-----------------+---------+----------------+--------------|
-| 1000 Ints      |    5.7 |     5.5 |          5.5 |     20.8 |             6.6 |     0.6 |            4.0 |          5.9 |
-| 10000 Ints     |   60.2 |    57.1 |         57.9 |    206.1 |            39.0 |     5.3 |           29.7 |         61.4 |
-| 100000 Ints    |  545.1 |   529.1 |        551.6 |   2091.2 |           384.3 |    53.3 |          412.9 |        615.3 |
+| 1000 Ints      |    5.7 |     5.5 |          5.5 |     20.8 |             6.6 |     0.6 |            2.9 |          5.9 |
+| 10000 Ints     |   60.2 |    57.1 |         57.9 |    206.1 |            39.0 |     5.3 |           28.6 |         61.4 |
+| 100000 Ints    |  545.1 |   529.1 |        551.6 |   2091.2 |           384.3 |    53.3 |          263.2 |        615.3 |
 | 1000 Classes   |    6.2 |     6.2 |          7.2 |     21.5 |             6.3 |     3.8 |            4.9 |          6.4 |
 | 10000 Classes  |   64.4 |    62.4 |         68.5 |    214.3 |            44.7 |    41.4 |           53.1 |         65.4 |
 | 100000 Classes |  592.0 |   600.3 |        611.6 |   2164.7 |           429.4 |   357.0 |          523.5 |        653.3 |
@@ -249,7 +249,8 @@ Observations:
 - *Avoid repeated use of ListBuffer.prepend!* Your runtime will slow by an order of magnitude vs ~+=:~.
 - For classes, at small scales (~1000 elements) there is mostly no difference between
   the various approaches.
-- I'm not sure what the point of ~ArrayBuilder~ is.
+- ~ArrayBuilder~ will let you build an Array when you don't know what the final size
+  will be, but it's about 5x slower to do so.
 - ~VectorBuilder~ fulfills the promise of Builders, but can only append to the right.
   You'd have to deal with the fact that your elements are reversed.
 
@@ -259,7 +260,8 @@ Recommendation:
 The best choice here depends on what your next step is.
 
 If you plan to perform ~while~ -based numeric calculations over primitives only,
-stick to ~Array~.
+stick to ~Array~. If using ~ArrayBuilder~ with primitives, avoid the ~.make~
+method. Use something like ~.ofInt~ instead.
 
 Otherwise, consider whether your algorithm can't be reexpressed entirely in terms
 of ~Iterator~. This will always give the best performance for subsequent chained,

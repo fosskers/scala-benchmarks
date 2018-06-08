@@ -29,7 +29,7 @@ class VectorBench {
   }
 
   def abuilder(n: Int): Array[Int] = {
-    val b = ArrayBuilder.make[Int]
+    val b = new ArrayBuilder.ofInt
     var i: Int = 0
 
     while (i < n) {
