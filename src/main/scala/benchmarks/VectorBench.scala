@@ -32,6 +32,16 @@ class VectorBench {
     val b = new ArrayBuilder.ofInt
     var i: Int = 0
 
+    /* Cheat and tell the builder how big you expect the result to be.
+     * Introduces a ~2x slowdown vs Array.
+     *
+     * Underestimating the hint (say by 2) will introduce about a 4x
+     * slowdown. Not hinting at all is about 5x slower overall.
+     *
+     * Rule of thumb: if you hint, try to overshoot.
+     */
+    b.sizeHint(n * 2)
+
     while (i < n) {
       b += i
       i += 1

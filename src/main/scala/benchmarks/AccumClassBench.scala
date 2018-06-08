@@ -32,6 +32,8 @@ class AccumClassBench {
     val b = ArrayBuilder.make[Pair]
     var i: Int = 0
 
+    b.sizeHint(n * 2)
+
     while (i < n) {
       b += Pair(i, i)
       i += 1
