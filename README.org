@@ -58,7 +58,7 @@ optimization flags. Entries marked with two are slowed down by them./
 | Tail Recursion | 39.2 |  37.9 |        |       | 118.6**        |          |
 | ~while~        | 39.3 |       |   57.8 |  36.2 | 70.1           |     39.2 |
 
-Conclusions:
+Observations:
 
 - ~foldLeft~ is always better than both ~foldRight~ and manual tail recursion for
   catamorphisms (reduction to a single value).
@@ -118,7 +118,7 @@ Results:
 | Reverse   |  37.8 |  49.2 |  146.7 |  45.6 |  371.6 |   448.5 |          |
 | Sort      | 327.5 | 607.6 |  277.8 | 289.4 | 1482.8 |         |          |
 
-Conclusions:
+Observations:
 
 - ~Stream~ won't do work it doesn't have to, as advertised (re: /Head/).
 - ~Stream~ is very slow to fully evaluate, implying no operation fusion.
@@ -133,6 +133,45 @@ Recommendation:
 If you want to chain higher-order operations in Scala, use an ~Iterator~.
 If you have something like a ~List~ instead, create an ~Iterator~ first
 with ~.iterator~ before you chain.
+#+END_QUOTE
+
+**** Concatenation
+
+Sometimes we need to merge two instances of a container together, end-to-end.
+This is embodied by the classic operator ~++~, available for all the major collection types.
+
+We know that the collection types are implemented differently. Are some better than
+others when it comes to ~++~? For instance, we might imagine that the singly-linked ~List~
+type would be quite bad at this. The lazy ~Stream~ types should be instantaneous.
+
+~ConcatBench~ tests ~List~, ~scalaz.IList~, ~Array~, ~Vector~, ~Stream~, and ~scalaz.EphemeralStream~
+for their performance with the ~++~ operator. Two results are offered for ~Array~: one with ~Int~ and
+one for a simple ~Pair~ class, to see if primitive Arrays can somehow be optimized here by the JVM,
+as they usually are. Otherwise, the results are all for collections of ~Int~.
+
+/All times are in microseconds./
+
+| Item Count | ~List~ | ~IList~ | ~Vector~ | ~Array[Int]~ | ~Array[Pair]~ | ~Stream~ | ~EStream~ |
+|------------+--------+---------+----------+--------------+---------------+----------+-----------|
+| 1,000      |     14 |      10 |       17 |          0.6 |           0.7 |     0.02 |      0.02 |
+| 10,000     |    117 |      78 |      147 |            7 |             7 |     0.02 |      0.02 |
+| 100,000    |    931 |     993 |     1209 |           75 |            77 |     0.02 |      0.02 |
+| 1,000,000  |   8506 |   10101 |    10958 |         1777 |          1314 |     0.02 |      0.02 |
+
+Observations:
+
+- The ~Stream~ types were instantaneous, as expected.
+- ~Array~ is quick! Somehow quicker for classes, though.
+- The drastic slowdown for ~Array~ at the millions-of-elements scale is strange.
+- ~IList~ beats ~List~ until millions-of-elements scale.
+- ~Vector~ has no advantage here, despite rumours to the contrary.
+
+Recommendation:
+
+#+BEGIN_QUOTE
+If your algorithm requires concatenation of large collections, use ~Array~.
+If you're worried about passing a mutable collection around your API, consider
+~scalaz.ImmutableArray~, a simple wrapper that prevents careless misuse.
 #+END_QUOTE
 
 *** Mutable Data
@@ -163,7 +202,7 @@ Results:
 | 1000 Classes  |        8.6 |        14.4 |               4.3 |
 | 10000 Classes |       81.3 |       181.4 |              46.7 |
 
-Conclusions:
+Observations:
 
 - For ~List~, there isn't too much difference between Ints and classes.
 - ~Array~ is fast to do a single-pass iteration.
@@ -203,7 +242,7 @@ Results:
 | 10000 Classes  |   64.4 |    62.4 |         68.5 |    214.3 |            44.7 |    41.4 |           53.1 |         65.4 |
 | 100000 Classes |  592.0 |   600.3 |        611.6 |   2164.7 |           429.4 |   357.0 |          523.5 |        653.3 |
 
-Conclusions:
+Observations:
 
 - For primitives, ~Array~ is king.
 - *Avoid appending to immutable Vectors.*
@@ -254,7 +293,7 @@ Results:
 *Note*: About half the time the 10000-value benchmark for ~mutable.Set~ optimizes
 down to ~600us instead of the ~800us shown in the chart.
 
-Conclusions:
+Observations:
 
 - ~mutable.Set~ is fastest at least for small amounts of data, and /might/ be
   fastest at scale.
@@ -314,7 +353,7 @@ Results:
 | ~+:~ Matching   | 79.0 |       | 1647.5 | 707.4 |         |  170.2 |
 | ~if~ Statements | 39.9 |       |  816.9 |  39.4 | 16020.6 |   55.8 |
 
-Conclusions:
+Observations:
 
 - Canonical ~List~ and ~IList~ matching is /fast/.
 - ~Seq~ matching with ~+:~, its canonical operator, is ironically slow.

@@ -16,7 +16,7 @@ scalacOptions := Seq(
 )
 
 libraryDependencies ++= Seq(
-  "org.scalaz" %% "scalaz-core" % "7.2.23"
+  "org.scalaz" %% "scalaz-core" % "7.2.24"
 )
 
 /* To run benchmarks:
