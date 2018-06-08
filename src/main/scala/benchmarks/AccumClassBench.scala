@@ -17,7 +17,7 @@ import scalaz.{IList, ICons, INil}
 class AccumClassBench {
 
   def array(n: Int): Array[Pair] = {
-    val a: Array[Pair] = Array.ofDim(n)
+    val a: Array[Pair] = new Array(n)
     var i: Int = 0
 
     while (i < n) {

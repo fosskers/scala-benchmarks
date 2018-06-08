@@ -17,7 +17,7 @@ import scalaz.{IList, ICons, INil}
 class VectorBench {
 
   def array(n: Int): Array[Int] = {
-    val a: Array[Int] = Array.ofDim(n)
+    val a: Array[Int] = new Array(n)
     var i: Int = 0
 
     while (i < n) {

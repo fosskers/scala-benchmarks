@@ -56,7 +56,7 @@ class MapBench {
   }
 
   def arrayWhile(arr: Array[Int]): Array[Int] = {
-    val newArr: Array[Int] = Array.ofDim(arr.length)
+    val newArr: Array[Int] = new Array(arr.length)
     var i: Int = 0
 
     while (i < arr.length) {
@@ -68,7 +68,7 @@ class MapBench {
   }
 
   def arrayWhileClass(arr: Array[Pair]): Array[Pair] = {
-    val newArr: Array[Pair] = Array.ofDim(arr.length)
+    val newArr: Array[Pair] = new Array(arr.length)
     var i: Int = 0
 
     while (i < arr.length) {
