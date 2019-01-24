@@ -4,6 +4,34 @@
 
 An independent set of benchmarks for testing common Scala idioms.
 
+** Running
+
+To run all benchmarks for the default Scala version (2.12):
+#+BEGIN_SRC shell
+  # runs benchmarks according to the rules:
+  #   -t 1      <-- one thread
+  #   -f 1      <-- one forked JVM
+  #   -wi 5     <-- five warmup runs before the actual measuring begins
+  #   -i 5      <-- five actual benchmarking iterations
+  #   .*Bench.* <-- only files matching `Bench` - which is all of them - are included in the run
+  sbt "jmh:run -t 1 -f 1 -wi 5 -i 5 .*Bench.*"
+#+END_SRC
+
+To run all benchmarks for an alternative Scala version:
+#+BEGIN_SRC shell
+  sbt "++2.13.0-M5 jmh:run -t 1 -f 1 -wi 5 -i 5 .*Bench.*"
+#+END_SRC
+
+Running all benchmarks can take a long time (i.e. hours). To specify a single `StreamBench` benchmark:
+#+BEGIN_SRC shell
+  sbt "jmh:run -t 1 -f 1 -wi 5 -i 5 .*StreamBench.*"
+#+END_SRC
+
+And to do the same for all supported Scala versions:
+#+BEGIN_SRC shell
+  sbt "+ jmh:run -t 1 -f 1 -wi 5 -i 5 .*StreamBench.*"
+#+END_SRC
+
 ** Results
 
 *** Functional Programming

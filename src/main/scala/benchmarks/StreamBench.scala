@@ -39,7 +39,6 @@ class StreamBench {
     str1 = Stream.range(1, 10000)
     str2 = Stream.range(10000, 1, -1)
     estr1 = EphemeralStream.range(1, 10000)
-    estr2 = EphemeralStream.fromStream(str2)
   }
 
   @Benchmark

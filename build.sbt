@@ -2,21 +2,31 @@ name := """scala-benchmarks"""
 
 version := "1.0.0"
 
-scalaVersion := "2.12.6"
+scalaVersion := "2.12.8"
+
+crossScalaVersions := Seq(scalaVersion.value, "2.13.0-M5")
 
 scalacOptions := Seq(
   "-opt:l:inline",
   "-opt-inline-from:**",
   "-deprecation",
-  "-Ypartial-unification",
   "-Ywarn-value-discard",
-  "-Ywarn-unused-import",
+  "-Ywarn-unused:imports",
   "-Ywarn-dead-code",
   "-Ywarn-numeric-widen"
 )
 
+Compile / unmanagedSourceDirectories ++= {
+  val mainSourceDir = baseDirectory.value / "src" / "main" / "scala"
+  CrossVersion.partialVersion(scalaVersion.value) match {
+    case Some((2, 13)) =>
+      Seq(file(mainSourceDir.getPath + "-2.13"))
+    case _ => Nil
+  }
+}
+
 libraryDependencies ++= Seq(
-  "org.scalaz" %% "scalaz-core" % "7.2.24"
+  "org.scalaz" %% "scalaz-core" % "7.2.27"
 )
 
 /* To run benchmarks:
