@@ -4,6 +4,7 @@ import java.util.concurrent.TimeUnit
 
 import scala.annotation.tailrec
 
+import cats.data.Chain
 import org.openjdk.jmh.annotations._
 import scalaz.{IList, ICons, INil}
 
@@ -20,6 +21,7 @@ class MatchContainersBench {
   var arr: Array[Int] = _
   var seq: Seq[Int] = _
   var stream: Stream[Int] = _
+  var chain: Chain[Int] = _
 
   @Setup
   def setup: Unit = {
@@ -29,6 +31,7 @@ class MatchContainersBench {
     arr = Array.range(1, 10000)
     seq = Seq.range(1, 10000)
     stream = Stream.range(1, 10000)
+    chain = Chain.range(1, 10000)
   }
 
   @Benchmark
@@ -175,4 +178,38 @@ class MatchContainersBench {
     work(stream)
   }
 
+  @Benchmark
+  def lastChainMatch: Option[Int] = {
+    @tailrec def work(l: Chain[Int]): Option[Int] = l match {
+      case Chain() => None
+      case h #:: Chain() => Some(h)
+      case _ #:: rest => work(rest)
+    }
+
+    work(chain)
+  }
+
+  @Benchmark
+  def lastChainMatchGeneric: Option[Int] = {
+    @tailrec def work(l: Chain[Int]): Option[Int] = l match {
+      case Chain() => None
+      case h +: Chain() => Some(h)
+      case _ +: rest => work(rest)
+    }
+
+    work(chain)
+  }
+
+  @Benchmark
+  def lastChainIf: Option[Int] = {
+    @tailrec def work(l: Chain[Int]): Option[Int] = {
+      if (l.isEmpty) { None }
+      else {
+        val t = l.tail
+        if (t.isEmpty) Some(l.head) else work(t)
+      }
+    }
+
+    work(chain)
+  }
 }

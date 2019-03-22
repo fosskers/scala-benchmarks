@@ -4,6 +4,7 @@ import java.util.concurrent.TimeUnit
 
 import scala.annotation.tailrec
 
+import cats.data.Chain
 import org.openjdk.jmh.annotations._
 import scalaz.{IList, ICons, INil, EphemeralStream => EStream}
 
@@ -20,6 +21,7 @@ class FoldBench {
   var array: Array[Int] = _
   var stream: Stream[Int] = _
   var estream: EStream[Int] = _
+  var chain: Chain[Int] = _
 
   @Setup
   def setup: Unit = {
@@ -29,6 +31,7 @@ class FoldBench {
     array = Array.range(1, 10000)
     stream = Stream.range(1, 10000)
     estream = EStream.range(1, 10000)
+    chain = Chain.range(1, 10000)
   }
 
   @Benchmark
@@ -159,4 +162,32 @@ class FoldBench {
   def estreamFoldLeft: Int = estream.foldLeft(0) { acc => { n => acc + n } }
   @Benchmark
   def estreamFoldRight: Int = estream.foldRight(0) { n => { acc => n + acc } }
+
+  @Benchmark
+  def chainFoldLeft: Int = chain.foldLeft(0)(_ + _)
+  @Benchmark
+  def chainFoldRight: Int = chain.foldRight(0)(_ + _)
+  @Benchmark
+  def chainTailrec: Int = {
+    @tailrec def work(l: Chain[Int], acc: Int): Int = l match {
+      case _ if l.isEmpty => acc
+      case h #:: rest => work(rest, h + acc)
+    }
+
+    work(chain, 0)
+  }
+  @Benchmark
+  def chainWhile: Int = {
+    var i: Int = 0
+    var l: Chain[Int] = chain
+
+    while (!l.isEmpty) {
+      i += l.head
+      l = l.tail
+    }
+
+    i
+  }
+  @Benchmark
+  def chainSum: Int = chain.sum
 }

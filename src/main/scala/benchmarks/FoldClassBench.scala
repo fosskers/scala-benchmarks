@@ -4,6 +4,7 @@ import java.util.concurrent.TimeUnit
 
 import scala.annotation.tailrec
 
+import cats.data.Chain
 import org.openjdk.jmh.annotations._
 import scalaz.{IList, ICons, INil}
 
@@ -19,6 +20,7 @@ class FoldClassBench {
   var vector: Vector[Pair] = _
   var array: Array[Pair] = _
   var stream: Stream[Pair] = _
+  var chain: Chain[Pair] = _
 
   @Setup
   def setup: Unit = {
@@ -27,6 +29,7 @@ class FoldClassBench {
     vector = Vector.range(1, 10000).map(n => Pair(n, n))
     array = Array.range(1, 10000).map(n => Pair(n, n))
     stream = Stream.range(1, 10000).map(n => Pair(n, n))
+    chain = Chain.range(1, 10000).map(n => Pair(n, n))
   }
 
   @Benchmark
@@ -145,4 +148,29 @@ class FoldClassBench {
     i
   }
 
+  @Benchmark
+  def chainFoldLeft: Pair = chain.foldLeft(Pair(0,0))(_ + _)
+  @Benchmark
+  def chainFoldRight: Pair = chain.foldRight(Pair(0,0))(_ + _)
+  @Benchmark
+  def chainTailrec: Pair = {
+    @tailrec def work(l: Chain[Pair], acc: Pair): Pair = l match {
+      case _ if l.isEmpty => acc
+      case h #:: rest => work(rest, h + acc)
+    }
+
+    work(chain, Pair(0,0))
+  }
+  @Benchmark
+  def chainWhile: Pair = {
+    var i: Pair = Pair(0,0)
+    var l: Chain[Pair] = chain
+
+    while (!l.isEmpty) {
+      i = i + l.head
+      l = l.tail
+    }
+
+    i
+  }
 }

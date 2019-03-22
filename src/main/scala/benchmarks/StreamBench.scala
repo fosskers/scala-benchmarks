@@ -2,6 +2,7 @@ package benchmarks
 
 import java.util.concurrent.TimeUnit
 
+import cats.data.Chain
 import org.openjdk.jmh.annotations._
 import scalaz.{IList, EphemeralStream}
 import scalaz.Scalaz._
@@ -25,6 +26,8 @@ class StreamBench {
   var str2: Stream[Int] = _
   var estr1: EphemeralStream[Int] = _
   var estr2: EphemeralStream[Int] = _
+  var chain1: Chain[Int] = _
+  var chain2: Chain[Int] = _
 
   @Setup
   def setup: Unit = {
@@ -40,6 +43,8 @@ class StreamBench {
     str2 = Stream.range(10000, 1, -1)
     estr1 = EphemeralStream.range(1, 10000)
     estr2 = EphemeralStream.fromStream(str2)
+    chain1 = Chain.fromList(list1)
+    chain2 = Chain.fromList(list2)
   }
 
   @Benchmark
@@ -99,4 +104,12 @@ class StreamBench {
   @Benchmark
   def arraySort: Int = arr2.map(_ + 1).filter(_ % 2 == 0).map(_ * 2).sorted.head
 
+  @Benchmark
+  def chainMax: Option[Int] = chain1.map(_ + 1).filter(_ % 2 == 0).map(_ * 2).maximum
+  @Benchmark
+  def chainHead: Option[Int] = chain1.map(_ + 1).filter(_ % 2 == 0).map(_ * 2).headOption
+  @Benchmark
+  def chainReverse: Option[Int] = chain1.reverse.headOption
+  @Benchmark
+  def chainSort: Option[Int] = chain2.map(_ + 1).filter(_ % 2 == 0).map(_ * 2).sorted.headOption
 }

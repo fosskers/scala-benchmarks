@@ -2,6 +2,7 @@ package benchmarks
 
 import java.util.concurrent.TimeUnit
 
+import cats.data.Chain
 import org.openjdk.jmh.annotations._
 import scalaz.{IList, EphemeralStream => EStream}
 
@@ -75,6 +76,15 @@ class ConcatBench {
   var estream2b: EStream[Int] = _
   var estream3b: EStream[Int] = _
 
+  var chain0: Chain[Int] = _
+  var chain1: Chain[Int] = _
+  var chain2: Chain[Int] = _
+  var chain3: Chain[Int] = _
+  var chain0b: Chain[Int] = _
+  var chain1b: Chain[Int] = _
+  var chain2b: Chain[Int] = _
+  var chain3b: Chain[Int] = _
+
   @Setup
   def setup: Unit = {
     list0 = List.range(1, 1000)
@@ -139,6 +149,15 @@ class ConcatBench {
     estream1b = EStream.range(1, 10000)
     estream2b = EStream.range(1, 100000)
     estream3b = EStream.range(1, 1000000)
+
+    chain0 = Chain.range(1, 1000)
+    chain1 = Chain.range(1, 10000)
+    chain2 = Chain.range(1, 100000)
+    chain3 = Chain.range(1, 1000000)
+    chain0b = Chain.range(1, 1000)
+    chain1b = Chain.range(1, 10000)
+    chain2b = Chain.range(1, 100000)
+    chain3b = Chain.range(1, 1000000)
   }
 
   def list(a: List[Int], b: List[Int]): List[Int] = a ++ b
@@ -148,6 +167,7 @@ class ConcatBench {
   def arrayC(a: Array[Pair], b: Array[Pair]): Array[Pair] = a ++ b
   def stream(a: Stream[Int], b: Stream[Int]): Stream[Int] = a ++ b
   def estream(a: EStream[Int], b: EStream[Int]): EStream[Int] = a ++ b
+  def chain(a: Chain[Int], b: Chain[Int]): Chain[Int] = a ++ b
 
   @Benchmark
   def list1k: List[Int] = list(list0, list0b)
@@ -211,4 +231,13 @@ class ConcatBench {
   def estream100k: EStream[Int] = estream(estream2 , estream2b)
   @Benchmark
   def estream1000k: EStream[Int] = estream(estream3 , estream3b)
+
+  @Benchmark
+  def chain1k: Chain[Int] = chain(chain0 , chain0b)
+  @Benchmark
+  def chain10k: Chain[Int] = chain(chain1 , chain1b)
+  @Benchmark
+  def chain100k: Chain[Int] = chain(chain2 , chain2b)
+  @Benchmark
+  def chain1000k: Chain[Int] = chain(chain3 , chain3b)
 }
