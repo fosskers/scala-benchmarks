@@ -112,10 +112,10 @@ class VectorBench {
 
     @tailrec def work(acc: Chain[Int], m: Int): Chain[Int] = m match {
       case _ if m == n => acc
-      case _ => work(ICons(m, acc), m + 1)
+      case _ => work(m +: acc, m + 1)
     }
 
-    work(INil(), 0)
+    work(Chain.empty, 0)
 
   }
 

@@ -3,6 +3,8 @@ package benchmarks
 import java.util.concurrent.TimeUnit
 
 import cats.data.Chain
+import cats.instances.int._
+import cats.syntax.foldable._
 import org.openjdk.jmh.annotations._
 import scalaz.{IList, EphemeralStream}
 import scalaz.Scalaz._
@@ -43,8 +45,8 @@ class StreamBench {
     str2 = Stream.range(10000, 1, -1)
     estr1 = EphemeralStream.range(1, 10000)
     estr2 = EphemeralStream.fromStream(str2)
-    chain1 = Chain.fromList(list1)
-    chain2 = Chain.fromList(list2)
+    chain1 = Chain.fromSeq(list1)
+    chain2 = Chain.fromSeq(list2)
   }
 
   @Benchmark
@@ -104,8 +106,7 @@ class StreamBench {
   @Benchmark
   def arraySort: Int = arr2.map(_ + 1).filter(_ % 2 == 0).map(_ * 2).sorted.head
 
-  @Benchmark
-  def chainMax: Option[Int] = chain1.map(_ + 1).filter(_ % 2 == 0).map(_ * 2).maximum
+  def chainMax: Option[Int] = chain1.map(_ + 1).filter(_ % 2 == 0).map(_ * 2).maximumOption
   @Benchmark
   def chainHead: Option[Int] = chain1.map(_ + 1).filter(_ % 2 == 0).map(_ * 2).headOption
   @Benchmark

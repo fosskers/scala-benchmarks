@@ -29,7 +29,7 @@ class FoldClassBench {
     vector = Vector.range(1, 10000).map(n => Pair(n, n))
     array = Array.range(1, 10000).map(n => Pair(n, n))
     stream = Stream.range(1, 10000).map(n => Pair(n, n))
-    chain = Chain.range(1, 10000).map(n => Pair(n, n))
+    chain = Chain.fromSeq(list)
   }
 
   @Benchmark
@@ -154,9 +154,9 @@ class FoldClassBench {
   def chainFoldRight: Pair = chain.foldRight(Pair(0,0))(_ + _)
   @Benchmark
   def chainTailrec: Pair = {
-    @tailrec def work(l: Chain[Pair], acc: Pair): Pair = l match {
-      case _ if l.isEmpty => acc
-      case h #:: rest => work(rest, h + acc)
+    @tailrec def work(l: Chain[Pair], acc: Pair): Pair = l.uncons match {
+      case None => acc
+      case Some((h, rest)) => work(rest, h + acc)
     }
 
     work(chain, Pair(0,0))
@@ -165,10 +165,12 @@ class FoldClassBench {
   def chainWhile: Pair = {
     var i: Pair = Pair(0,0)
     var l: Chain[Pair] = chain
+    var uc = l.uncons
 
-    while (!l.isEmpty) {
-      i = i + l.head
-      l = l.tail
+    while (!uc.isEmpty) {
+      i += uc.get._1
+      l = uc.get._2
+      uc = l.uncons
     }
 
     i

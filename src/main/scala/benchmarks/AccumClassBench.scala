@@ -160,11 +160,11 @@ class AccumClassBench {
   def buffer100000: List[Pair] = buffer(100000)
 
   @Benchmark
-  def chain1000: List[Pair] = chain(1000)
+  def chain1000: Chain[Pair] = chain(1000)
   @Benchmark
-  def chain10000: List[Pair] = chain(10000)
+  def chain10000: Chain[Pair] = chain(10000)
   @Benchmark
-  def chain100000: List[Pair] = chain(100000)
+  def chain100000: Chain[Pair] = chain(100000)
 
   @Benchmark
   def foryield1000: IndexedSeq[Pair] = foryield(1000)
@@ -172,5 +172,4 @@ class AccumClassBench {
   def foryield10000: IndexedSeq[Pair] = foryield(10000)
   @Benchmark
   def foryield100000: IndexedSeq[Pair] = foryield(100000)
-
 }

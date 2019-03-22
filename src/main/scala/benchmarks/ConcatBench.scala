@@ -150,14 +150,14 @@ class ConcatBench {
     estream2b = EStream.range(1, 100000)
     estream3b = EStream.range(1, 1000000)
 
-    chain0 = Chain.range(1, 1000)
-    chain1 = Chain.range(1, 10000)
-    chain2 = Chain.range(1, 100000)
-    chain3 = Chain.range(1, 1000000)
-    chain0b = Chain.range(1, 1000)
-    chain1b = Chain.range(1, 10000)
-    chain2b = Chain.range(1, 100000)
-    chain3b = Chain.range(1, 1000000)
+    chain0 = Chain.fromSeq(list0)
+    chain1 = Chain.fromSeq(list1)
+    chain2 = Chain.fromSeq(list2)
+    chain3 = Chain.fromSeq(list3)
+    chain0b = Chain.fromSeq(list0)
+    chain1b = Chain.fromSeq(list1)
+    chain2b = Chain.fromSeq(list2)
+    chain3b = Chain.fromSeq(list3)
   }
 
   def list(a: List[Int], b: List[Int]): List[Int] = a ++ b

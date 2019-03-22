@@ -2,6 +2,7 @@ package benchmarks
 
 import java.util.concurrent.TimeUnit
 
+import cats.data.Chain
 import org.openjdk.jmh.annotations._
 import scalaz.IList
 
@@ -49,9 +50,9 @@ class MapBench {
     array0 = Array.range(1, 100)
     array1 = Array.range(1, 1000)
     array2 = Array.range(1, 10000)
-    chain0 = Chain.range(1, 100)
-    chain1 = Chain.range(1, 1000)
-    chain2 = Chain.range(1, 10000)
+    chain0 = Chain.fromSeq(list0)
+    chain1 = Chain.fromSeq(list1)
+    chain2 = Chain.fromSeq(list2)
 
     listC0 = list0.map(n => Pair(n, n))
     listC1 = list1.map(n => Pair(n, n))

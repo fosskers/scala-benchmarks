@@ -31,7 +31,7 @@ class FoldBench {
     array = Array.range(1, 10000)
     stream = Stream.range(1, 10000)
     estream = EStream.range(1, 10000)
-    chain = Chain.range(1, 10000)
+    chain = Chain.fromSeq(list)
   }
 
   @Benchmark
@@ -169,9 +169,9 @@ class FoldBench {
   def chainFoldRight: Int = chain.foldRight(0)(_ + _)
   @Benchmark
   def chainTailrec: Int = {
-    @tailrec def work(l: Chain[Int], acc: Int): Int = l match {
-      case _ if l.isEmpty => acc
-      case h #:: rest => work(rest, h + acc)
+    @tailrec def work(l: Chain[Int], acc: Int): Int = l.uncons match {
+      case None            => acc
+      case Some((h, rest)) => work(rest, h + acc)
     }
 
     work(chain, 0)
@@ -180,14 +180,14 @@ class FoldBench {
   def chainWhile: Int = {
     var i: Int = 0
     var l: Chain[Int] = chain
+    var uc = l.uncons
 
-    while (!l.isEmpty) {
-      i += l.head
-      l = l.tail
+    while (!uc.isEmpty) {
+      i += uc.get._1
+      l = uc.get._2
+      uc = l.uncons
     }
 
     i
   }
-  @Benchmark
-  def chainSum: Int = chain.sum
 }

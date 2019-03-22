@@ -31,7 +31,7 @@ class MatchContainersBench {
     arr = Array.range(1, 10000)
     seq = Seq.range(1, 10000)
     stream = Stream.range(1, 10000)
-    chain = Chain.range(1, 10000)
+    chain = Chain.fromSeq(list)
   }
 
   @Benchmark
@@ -180,10 +180,10 @@ class MatchContainersBench {
 
   @Benchmark
   def lastChainMatch: Option[Int] = {
-    @tailrec def work(l: Chain[Int]): Option[Int] = l match {
-      case Chain() => None
-      case h #:: Chain() => Some(h)
-      case _ #:: rest => work(rest)
+    @tailrec def work(l: Chain[Int]): Option[Int] = l.uncons match {
+      case None                      => None
+      case Some((h, t)) if t.isEmpty => Some(h)
+      case Some((_, rest))           => work(rest)
     }
 
     work(chain)
@@ -192,9 +192,9 @@ class MatchContainersBench {
   @Benchmark
   def lastChainMatchGeneric: Option[Int] = {
     @tailrec def work(l: Chain[Int]): Option[Int] = l match {
-      case Chain() => None
-      case h +: Chain() => Some(h)
-      case _ +: rest => work(rest)
+      case _ if l.isEmpty             => None
+      case (h: Int) +: t if t.isEmpty => Some(h)
+      case _ +: (rest: Chain[Int])    => work(rest)
     }
 
     work(chain)
@@ -205,8 +205,8 @@ class MatchContainersBench {
     @tailrec def work(l: Chain[Int]): Option[Int] = {
       if (l.isEmpty) { None }
       else {
-        val t = l.tail
-        if (t.isEmpty) Some(l.head) else work(t)
+        val (h, t) = l.uncons.get
+        if (t.isEmpty) Some(h) else work(t)
       }
     }
 
