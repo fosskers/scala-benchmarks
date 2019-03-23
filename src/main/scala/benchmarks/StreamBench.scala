@@ -111,6 +111,4 @@ class StreamBench {
   def chainHead: Option[Int] = chain1.map(_ + 1).filter(_ % 2 == 0).map(_ * 2).headOption
   @Benchmark
   def chainReverse: Option[Int] = chain1.reverse.headOption
-  @Benchmark
-  def chainSort: Option[Int] = chain2.map(_ + 1).filter(_ % 2 == 0).map(_ * 2).sorted.headOption
 }
