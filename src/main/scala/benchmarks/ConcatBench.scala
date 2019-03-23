@@ -2,6 +2,7 @@ package benchmarks
 
 import java.util.concurrent.TimeUnit
 
+import cats.data.Chain
 import org.openjdk.jmh.annotations._
 import scalaz.{IList, EphemeralStream => EStream}
 
@@ -57,14 +58,14 @@ class ConcatBench {
   var arrayC2b: Array[Pair] = _
   var arrayC3b: Array[Pair] = _
 
-  var stream0: Stream[Int] = _
-  var stream1: Stream[Int] = _
-  var stream2: Stream[Int] = _
-  var stream3: Stream[Int] = _
-  var stream0b: Stream[Int] = _
-  var stream1b: Stream[Int] = _
-  var stream2b: Stream[Int] = _
-  var stream3b: Stream[Int] = _
+  var lazyList0: LazyList[Int] = _
+  var lazyList1: LazyList[Int] = _
+  var lazyList2: LazyList[Int] = _
+  var lazyList3: LazyList[Int] = _
+  var lazyList0b: LazyList[Int] = _
+  var lazyList1b: LazyList[Int] = _
+  var lazyList2b: LazyList[Int] = _
+  var lazyList3b: LazyList[Int] = _
 
   var estream0: EStream[Int] = _
   var estream1: EStream[Int] = _
@@ -74,6 +75,15 @@ class ConcatBench {
   var estream1b: EStream[Int] = _
   var estream2b: EStream[Int] = _
   var estream3b: EStream[Int] = _
+
+  var chain0: Chain[Int] = _
+  var chain1: Chain[Int] = _
+  var chain2: Chain[Int] = _
+  var chain3: Chain[Int] = _
+  var chain0b: Chain[Int] = _
+  var chain1b: Chain[Int] = _
+  var chain2b: Chain[Int] = _
+  var chain3b: Chain[Int] = _
 
   @Setup
   def setup: Unit = {
@@ -122,14 +132,14 @@ class ConcatBench {
     arrayC2b = Array.range(1, 100000).map(n => Pair(n, n))
     arrayC3b = Array.range(1, 1000000).map(n => Pair(n, n))
 
-    stream0 = Stream.range(1, 1000)
-    stream1 = Stream.range(1, 10000)
-    stream2 = Stream.range(1, 100000)
-    stream3 = Stream.range(1, 1000000)
-    stream0b = Stream.range(1, 1000)
-    stream1b = Stream.range(1, 10000)
-    stream2b = Stream.range(1, 100000)
-    stream3b = Stream.range(1, 1000000)
+    lazyList0 = LazyList.range(1, 1000)
+    lazyList1 = LazyList.range(1, 10000)
+    lazyList2 = LazyList.range(1, 100000)
+    lazyList3 = LazyList.range(1, 1000000)
+    lazyList0b = LazyList.range(1, 1000)
+    lazyList1b = LazyList.range(1, 10000)
+    lazyList2b = LazyList.range(1, 100000)
+    lazyList3b = LazyList.range(1, 1000000)
 
     estream0 = EStream.range(1, 1000)
     estream1 = EStream.range(1, 10000)
@@ -139,6 +149,15 @@ class ConcatBench {
     estream1b = EStream.range(1, 10000)
     estream2b = EStream.range(1, 100000)
     estream3b = EStream.range(1, 1000000)
+
+    chain0 = Chain.fromSeq(list0)
+    chain1 = Chain.fromSeq(list1)
+    chain2 = Chain.fromSeq(list2)
+    chain3 = Chain.fromSeq(list3)
+    chain0b = Chain.fromSeq(list0)
+    chain1b = Chain.fromSeq(list1)
+    chain2b = Chain.fromSeq(list2)
+    chain3b = Chain.fromSeq(list3)
   }
 
   def list(a: List[Int], b: List[Int]): List[Int] = a ++ b
@@ -146,8 +165,9 @@ class ConcatBench {
   def vector(a: Vector[Int], b: Vector[Int]): Vector[Int] = a ++ b
   def array(a: Array[Int], b: Array[Int]): Array[Int] = a ++ b
   def arrayC(a: Array[Pair], b: Array[Pair]): Array[Pair] = a ++ b
-  def stream(a: Stream[Int], b: Stream[Int]): Stream[Int] = a ++ b
+  def lazyList(a: LazyList[Int], b: LazyList[Int]): LazyList[Int] = a ++ b
   def estream(a: EStream[Int], b: EStream[Int]): EStream[Int] = a ++ b
+  def chain(a: Chain[Int], b: Chain[Int]): Chain[Int] = a ++ b
 
   @Benchmark
   def list1k: List[Int] = list(list0, list0b)
@@ -195,13 +215,13 @@ class ConcatBench {
   def arrayC1000k: Array[Pair] = arrayC(arrayC3 , arrayC3b)
 
   @Benchmark
-  def stream1k: Stream[Int] = stream(stream0 , stream0b)
+  def lazyList1k: LazyList[Int] = lazyList(lazyList0 , lazyList0b)
   @Benchmark
-  def stream10k: Stream[Int] = stream(stream1 , stream1b)
+  def lazyList10k: LazyList[Int] = lazyList(lazyList1 , lazyList1b)
   @Benchmark
-  def stream100k: Stream[Int] = stream(stream2 , stream2b)
+  def lazyList100k: LazyList[Int] = lazyList(lazyList2 , lazyList2b)
   @Benchmark
-  def stream1000k: Stream[Int] = stream(stream3 , stream3b)
+  def lazyList1000k: LazyList[Int] = lazyList(lazyList3 , lazyList3b)
 
   @Benchmark
   def estream1k: EStream[Int] = estream(estream0 , estream0b)
@@ -211,4 +231,13 @@ class ConcatBench {
   def estream100k: EStream[Int] = estream(estream2 , estream2b)
   @Benchmark
   def estream1000k: EStream[Int] = estream(estream3 , estream3b)
+
+  @Benchmark
+  def chain1k: Chain[Int] = chain(chain0 , chain0b)
+  @Benchmark
+  def chain10k: Chain[Int] = chain(chain1 , chain1b)
+  @Benchmark
+  def chain100k: Chain[Int] = chain(chain2 , chain2b)
+  @Benchmark
+  def chain1000k: Chain[Int] = chain(chain3 , chain3b)
 }

@@ -6,6 +6,7 @@ import scala.annotation.tailrec
 import scala.collection.immutable.VectorBuilder
 import scala.collection.mutable.{ArrayBuilder, ListBuffer}
 
+import cats.data.Chain
 import org.openjdk.jmh.annotations._
 import scalaz.{IList, ICons, INil}
 
@@ -107,6 +108,17 @@ class VectorBench {
     b.result
   }
 
+  def chain(n: Int): Chain[Int] = {
+
+    @tailrec def work(acc: Chain[Int], m: Int): Chain[Int] = m match {
+      case _ if m == n => acc
+      case _ => work(m +: acc, m + 1)
+    }
+
+    work(Chain.empty, 0)
+
+  }
+
   def foryield(n: Int): IndexedSeq[Int] = for (i <- 0 to n) yield i
 
   @Benchmark
@@ -159,10 +171,16 @@ class VectorBench {
   def buffer100000: List[Int] = buffer(100000)
 
   @Benchmark
+  def chain1000: Chain[Int] = chain(1000)
+  @Benchmark
+  def chain10000: Chain[Int] = chain(10000)
+  @Benchmark
+  def chain100000: Chain[Int] = chain(100000)
+
+  @Benchmark
   def foryield1000: IndexedSeq[Int] = foryield(1000)
   @Benchmark
   def foryield10000: IndexedSeq[Int] = foryield(10000)
   @Benchmark
   def foryield100000: IndexedSeq[Int] = foryield(100000)
-
 }

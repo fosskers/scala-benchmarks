@@ -2,6 +2,7 @@ package benchmarks
 
 import java.util.concurrent.TimeUnit
 
+import cats.data.Chain
 import org.openjdk.jmh.annotations._
 import scalaz.IList
 
@@ -21,6 +22,9 @@ class MapBench {
   var array0: Array[Int] = _
   var array1: Array[Int] = _
   var array2: Array[Int] = _
+  var chain0: Chain[Int] = _
+  var chain1: Chain[Int] = _
+  var chain2: Chain[Int] = _
 
   var listC0: List[Pair] = _
   var listC1: List[Pair] = _
@@ -31,6 +35,9 @@ class MapBench {
   var arrayC0: Array[Pair] = _
   var arrayC1: Array[Pair] = _
   var arrayC2: Array[Pair] = _
+  var chainC0: Chain[Pair] = _
+  var chainC1: Chain[Pair] = _
+  var chainC2: Chain[Pair] = _
 
   @Setup
   def setup: Unit = {
@@ -43,6 +50,9 @@ class MapBench {
     array0 = Array.range(1, 100)
     array1 = Array.range(1, 1000)
     array2 = Array.range(1, 10000)
+    chain0 = Chain.fromSeq(list0)
+    chain1 = Chain.fromSeq(list1)
+    chain2 = Chain.fromSeq(list2)
 
     listC0 = list0.map(n => Pair(n, n))
     listC1 = list1.map(n => Pair(n, n))
@@ -53,6 +63,9 @@ class MapBench {
     arrayC0 = array0.map(n => Pair(n, n))
     arrayC1 = array1.map(n => Pair(n, n))
     arrayC2 = array2.map(n => Pair(n, n))
+    chainC0 = chain0.map(n => Pair(n, n))
+    chainC1 = chain1.map(n => Pair(n, n))
+    chainC2 = chain2.map(n => Pair(n, n))
   }
 
   def arrayWhile(arr: Array[Int]): Array[Int] = {
@@ -87,6 +100,10 @@ class MapBench {
   def ilistMap(l: IList[Int]): IList[Int] = l.map(_ * 37)
 
   def ilistMapClass(l: IList[Pair]): IList[Pair] = l.map { case Pair(c, r) => Pair(c * 37, r * 37) }
+
+  def chainMap(l: Chain[Int]): Chain[Int] = l.map(_ * 37)
+
+  def chainMapClass(l: Chain[Pair]): Chain[Pair] = l.map { case Pair(c, r) => Pair(c * 37, r * 37) }
 
   @Benchmark
   def list100: List[Int] = listMap(list0)
@@ -130,4 +147,17 @@ class MapBench {
   @Benchmark
   def arrayClass10000: Array[Pair] = arrayWhileClass(arrayC2)
 
+  @Benchmark
+  def chain100: Chain[Int] = chainMap(chain0)
+  @Benchmark
+  def chain1000: Chain[Int] = chainMap(chain1)
+  @Benchmark
+  def chain10000: Chain[Int] = chainMap(chain2)
+
+  @Benchmark
+  def chainClass100: Chain[Pair] = chainMapClass(chainC0)
+  @Benchmark
+  def chainClass1000: Chain[Pair] = chainMapClass(chainC1)
+  @Benchmark
+  def chainClass10000: Chain[Pair] = chainMapClass(chainC2)
 }

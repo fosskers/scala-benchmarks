@@ -4,6 +4,7 @@ import java.util.concurrent.TimeUnit
 
 import scala.annotation.tailrec
 
+import cats.data.Chain
 import org.openjdk.jmh.annotations._
 import scalaz.{IList, ICons, INil}
 
@@ -18,7 +19,8 @@ class FoldClassBench {
   var ilist: IList[Pair] = _
   var vector: Vector[Pair] = _
   var array: Array[Pair] = _
-  var stream: Stream[Pair] = _
+  var lazyList: LazyList[Pair] = _
+  var chain: Chain[Pair] = _
 
   @Setup
   def setup: Unit = {
@@ -26,7 +28,8 @@ class FoldClassBench {
     ilist = IList.fromList(list)
     vector = Vector.range(1, 10000).map(n => Pair(n, n))
     array = Array.range(1, 10000).map(n => Pair(n, n))
-    stream = Stream.range(1, 10000).map(n => Pair(n, n))
+    lazyList = LazyList.range(1, 10000).map(n => Pair(n, n))
+    chain = Chain.fromSeq(list)
   }
 
   @Benchmark
@@ -120,22 +123,22 @@ class FoldClassBench {
   }
 
   @Benchmark
-  def streamFoldLeft: Pair = stream.foldLeft(Pair(0,0))(_ + _)
+  def lazyListFoldLeft: Pair = lazyList.foldLeft(Pair(0,0))(_ + _)
   @Benchmark
-  def streamFoldRight: Pair = stream.foldRight(Pair(0,0))(_ + _)
+  def lazyListFoldRight: Pair = lazyList.foldRight(Pair(0,0))(_ + _)
   @Benchmark
-  def streamTailrec: Pair = {
-    @tailrec def work(l: Stream[Pair], acc: Pair): Pair = l match {
+  def lazyListTailrec: Pair = {
+    @tailrec def work(l: LazyList[Pair], acc: Pair): Pair = l match {
       case _ if l.isEmpty => acc
       case h #:: rest => work(rest, h + acc)
     }
 
-    work(stream, Pair(0,0))
+    work(lazyList, Pair(0,0))
   }
   @Benchmark
-  def streamWhile: Pair = {
+  def lazyListWhile: Pair = {
     var i: Pair = Pair(0,0)
-    var l: Stream[Pair] = stream
+    var l: LazyList[Pair] = lazyList
 
     while (!l.isEmpty) {
       i = i + l.head
@@ -145,4 +148,31 @@ class FoldClassBench {
     i
   }
 
+  @Benchmark
+  def chainFoldLeft: Pair = chain.foldLeft(Pair(0,0))(_ + _)
+  @Benchmark
+  def chainFoldRight: Pair = chain.foldRight(Pair(0,0))(_ + _)
+  @Benchmark
+  def chainTailrec: Pair = {
+    @tailrec def work(l: Chain[Pair], acc: Pair): Pair = l.uncons match {
+      case None => acc
+      case Some((h, rest)) => work(rest, h + acc)
+    }
+
+    work(chain, Pair(0,0))
+  }
+  @Benchmark
+  def chainWhile: Pair = {
+    var i: Pair = Pair(0,0)
+    var l: Chain[Pair] = chain
+    var uc = l.uncons
+
+    while (!uc.isEmpty) {
+      i += uc.get._1
+      l = uc.get._2
+      uc = l.uncons
+    }
+
+    i
+  }
 }

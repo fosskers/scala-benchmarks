@@ -6,6 +6,7 @@ import scala.annotation.tailrec
 import scala.collection.immutable.VectorBuilder
 import scala.collection.mutable.{ArrayBuilder, ListBuffer}
 
+import cats.data.Chain
 import org.openjdk.jmh.annotations._
 import scalaz.{IList, ICons, INil}
 
@@ -98,6 +99,15 @@ class AccumClassBench {
     b.result
   }
 
+  def chain(n: Int): Chain[Pair] = {
+
+    @tailrec def work(acc: Chain[Pair], m: Int): Chain[Pair] = m match {
+      case _ if m == n => acc
+      case _ => work(Pair(m, m) +: acc, m + 1)
+    }
+    work(Chain.empty[Pair], 0)
+  }
+
   def foryield(n: Int): IndexedSeq[Pair] = for (i <- 0 to n) yield Pair(i, i)
 
   @Benchmark
@@ -150,10 +160,16 @@ class AccumClassBench {
   def buffer100000: List[Pair] = buffer(100000)
 
   @Benchmark
+  def chain1000: Chain[Pair] = chain(1000)
+  @Benchmark
+  def chain10000: Chain[Pair] = chain(10000)
+  @Benchmark
+  def chain100000: Chain[Pair] = chain(100000)
+
+  @Benchmark
   def foryield1000: IndexedSeq[Pair] = foryield(1000)
   @Benchmark
   def foryield10000: IndexedSeq[Pair] = foryield(10000)
   @Benchmark
   def foryield100000: IndexedSeq[Pair] = foryield(100000)
-
 }

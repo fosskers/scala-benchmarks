@@ -4,6 +4,7 @@ import java.util.concurrent.TimeUnit
 
 import scala.annotation.tailrec
 
+import cats.data.Chain
 import org.openjdk.jmh.annotations._
 import scalaz.{IList, ICons, INil}
 
@@ -19,7 +20,8 @@ class MatchContainersBench {
   var vec: Vector[Int] = _
   var arr: Array[Int] = _
   var seq: Seq[Int] = _
-  var stream: Stream[Int] = _
+  var lazyList: LazyList[Int] = _
+  var chain: Chain[Int] = _
 
   @Setup
   def setup: Unit = {
@@ -28,7 +30,8 @@ class MatchContainersBench {
     vec = Vector.range(1, 10000)
     arr = Array.range(1, 10000)
     seq = Seq.range(1, 10000)
-    stream = Stream.range(1, 10000)
+    lazyList = LazyList.range(1, 10000)
+    chain = Chain.fromSeq(list)
   }
 
   @Benchmark
@@ -141,30 +144,30 @@ class MatchContainersBench {
   }
 
   @Benchmark
-  def lastStreamMatch: Option[Int] = {
-    @tailrec def work(l: Stream[Int]): Option[Int] = l match {
-      case Stream() => None
-      case h #:: Stream() => Some(h)
+  def lastLazyListMatch: Option[Int] = {
+    @tailrec def work(l: LazyList[Int]): Option[Int] = l match {
+      case LazyList() => None
+      case h #:: LazyList() => Some(h)
       case _ #:: rest => work(rest)
     }
 
-    work(stream)
+    work(lazyList)
   }
 
   @Benchmark
-  def lastStreamMatchGeneric: Option[Int] = {
-    @tailrec def work(l: Stream[Int]): Option[Int] = l match {
-      case Stream() => None
-      case h +: Stream() => Some(h)
+  def lastLazyListMatchGeneric: Option[Int] = {
+    @tailrec def work(l: LazyList[Int]): Option[Int] = l match {
+      case LazyList() => None
+      case h +: LazyList() => Some(h)
       case _ +: rest => work(rest)
     }
 
-    work(stream)
+    work(lazyList)
   }
 
   @Benchmark
-  def lastStreamIf: Option[Int] = {
-    @tailrec def work(l: Stream[Int]): Option[Int] = {
+  def lastLazyListIf: Option[Int] = {
+    @tailrec def work(l: LazyList[Int]): Option[Int] = {
       if (l.isEmpty) { None }
       else {
         val t = l.tail
@@ -172,7 +175,41 @@ class MatchContainersBench {
       }
     }
 
-    work(stream)
+    work(lazyList)
   }
 
+  @Benchmark
+  def lastChainMatch: Option[Int] = {
+    @tailrec def work(l: Chain[Int]): Option[Int] = l.uncons match {
+      case None                      => None
+      case Some((h, t)) if t.isEmpty => Some(h)
+      case Some((_, rest))           => work(rest)
+    }
+
+    work(chain)
+  }
+
+  @Benchmark
+  def lastChainMatchGeneric: Option[Int] = {
+    @tailrec def work(l: Chain[Int]): Option[Int] = l match {
+      case _ if l.isEmpty             => None
+      case (h: Int) +: t if t.isEmpty => Some(h)
+      case _ +: (rest: Chain[Int])    => work(rest)
+    }
+
+    work(chain)
+  }
+
+  @Benchmark
+  def lastChainIf: Option[Int] = {
+    @tailrec def work(l: Chain[Int]): Option[Int] = {
+      if (l.isEmpty) { None }
+      else {
+        val (h, t) = l.uncons.get
+        if (t.isEmpty) Some(h) else work(t)
+      }
+    }
+
+    work(chain)
+  }
 }
