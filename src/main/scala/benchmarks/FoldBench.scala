@@ -19,7 +19,7 @@ class FoldBench {
   var ilist: IList[Int] = _
   var vector: Vector[Int] = _
   var array: Array[Int] = _
-  var stream: Stream[Int] = _
+  var lazyList: LazyList[Int] = _
   var estream: EStream[Int] = _
   var chain: Chain[Int] = _
 
@@ -29,7 +29,7 @@ class FoldBench {
     ilist = IList.fromList(list)
     vector = Vector.range(1, 10000)
     array = Array.range(1, 10000)
-    stream = Stream.range(1, 10000)
+    lazyList = LazyList.range(1, 10000)
     estream = EStream.range(1, 10000)
     chain = Chain.fromSeq(list)
   }
@@ -131,22 +131,22 @@ class FoldBench {
   def arraySum: Int = array.sum
 
   @Benchmark
-  def streamFoldLeft: Int = stream.foldLeft(0)(_ + _)
+  def lazyListFoldLeft: Int = lazyList.foldLeft(0)(_ + _)
   @Benchmark
-  def streamFoldRight: Int = stream.foldRight(0)(_ + _)
+  def lazyListFoldRight: Int = lazyList.foldRight(0)(_ + _)
   @Benchmark
-  def streamTailrec: Int = {
-    @tailrec def work(l: Stream[Int], acc: Int): Int = l match {
+  def lazyListTailrec: Int = {
+    @tailrec def work(l: LazyList[Int], acc: Int): Int = l match {
       case _ if l.isEmpty => acc
       case h #:: rest => work(rest, h + acc)
     }
 
-    work(stream, 0)
+    work(lazyList, 0)
   }
   @Benchmark
-  def streamWhile: Int = {
+  def lazyListWhile: Int = {
     var i: Int = 0
-    var l: Stream[Int] = stream
+    var l: LazyList[Int] = lazyList
 
     while (!l.isEmpty) {
       i += l.head
@@ -156,7 +156,7 @@ class FoldBench {
     i
   }
   @Benchmark
-  def streamSum: Int = stream.sum
+  def lazyListSum: Int = lazyList.sum
 
   @Benchmark
   def estreamFoldLeft: Int = estream.foldLeft(0) { acc => { n => acc + n } }

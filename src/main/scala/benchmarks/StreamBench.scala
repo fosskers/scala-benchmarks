@@ -24,8 +24,8 @@ class StreamBench {
   var vec2: Vector[Int] = _
   var arr1: Array[Int] = _
   var arr2: Array[Int] = _
-  var str1: Stream[Int] = _
-  var str2: Stream[Int] = _
+  var str1: LazyList[Int] = _
+  var str2: LazyList[Int] = _
   var estr1: EphemeralStream[Int] = _
   var estr2: EphemeralStream[Int] = _
   var chain1: Chain[Int] = _
@@ -41,22 +41,21 @@ class StreamBench {
     vec2 = Vector.range(10000, 1, -1)
     arr1 = Array.range(1, 10000)
     arr2 = Array.range(10000, 1, -1)
-    str1 = Stream.range(1, 10000)
-    str2 = Stream.range(10000, 1, -1)
+    str1 = LazyList.range(1, 10000)
+    str2 = LazyList.range(10000, 1, -1)
     estr1 = EphemeralStream.range(1, 10000)
-    estr2 = EphemeralStream.fromStream(str2)
     chain1 = Chain.fromSeq(list1)
     chain2 = Chain.fromSeq(list2)
   }
 
   @Benchmark
-  def streamMax: Int = str1.map(_ + 1).filter(_ % 2 == 0).map(_ * 2).max
+  def lazylistMax: Int = str1.map(_ + 1).filter(_ % 2 == 0).map(_ * 2).max
   @Benchmark
-  def streamHead: Int = str1.map(_ + 1).filter(_ % 2 == 0).map(_ * 2).head
+  def lazylistHead: Int = str1.map(_ + 1).filter(_ % 2 == 0).map(_ * 2).head
   @Benchmark
-  def streamReverse: Int = str1.reverse.head
+  def lazylistReverse: Int = str1.reverse.head
   @Benchmark
-  def streamSort: Int = str2.map(_ + 1).filter(_ % 2 == 0).map(_ * 2).sorted.head
+  def lazylistSort: Int = str2.map(_ + 1).filter(_ % 2 == 0).map(_ * 2).sorted.head
 
   @Benchmark
   def ephemeralStreamMax: Option[Int] = estr1.map(_ + 1).filter(_ % 2 == 0).map(_ * 2).maximum

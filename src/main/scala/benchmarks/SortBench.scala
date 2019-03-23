@@ -35,11 +35,11 @@ class SortBench {
   }
 
   @Benchmark
-  def sortStream0: Stream[Int] = Stream.range(1, 1000).sorted
+  def sortLazyList0: LazyList[Int] = LazyList.range(1, 1000).sorted
   @Benchmark
-  def sortStream1: Stream[Int] = Stream.range(1, 10000).sorted
+  def sortLazyList1: LazyList[Int] = LazyList.range(1, 10000).sorted
   @Benchmark
-  def sortStream2: Stream[Int] = Stream.range(1, 100000).sorted
+  def sortLazyList2: LazyList[Int] = LazyList.range(1, 100000).sorted
 
   @Benchmark
   def sortList0: List[Int] = list0.sorted
@@ -93,11 +93,11 @@ class BackwardSortBench {
   }
 
   @Benchmark
-  def sortStream0: Stream[Int] = Stream.range(1000, 1, -1).sorted
+  def sortLazyList0: LazyList[Int] = LazyList.range(1000, 1, -1).sorted
   @Benchmark
-  def sortStream1: Stream[Int] = Stream.range(10000, 1, -1).sorted
+  def sortLazyList1: LazyList[Int] = LazyList.range(10000, 1, -1).sorted
   @Benchmark
-  def sortStream2: Stream[Int] = Stream.range(100000, 1, -1).sorted
+  def sortLazyList2: LazyList[Int] = LazyList.range(100000, 1, -1).sorted
 
   @Benchmark
   def sortList0: List[Int] = list0.sorted

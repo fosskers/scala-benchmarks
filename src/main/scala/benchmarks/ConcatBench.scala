@@ -58,14 +58,14 @@ class ConcatBench {
   var arrayC2b: Array[Pair] = _
   var arrayC3b: Array[Pair] = _
 
-  var stream0: Stream[Int] = _
-  var stream1: Stream[Int] = _
-  var stream2: Stream[Int] = _
-  var stream3: Stream[Int] = _
-  var stream0b: Stream[Int] = _
-  var stream1b: Stream[Int] = _
-  var stream2b: Stream[Int] = _
-  var stream3b: Stream[Int] = _
+  var lazyList0: LazyList[Int] = _
+  var lazyList1: LazyList[Int] = _
+  var lazyList2: LazyList[Int] = _
+  var lazyList3: LazyList[Int] = _
+  var lazyList0b: LazyList[Int] = _
+  var lazyList1b: LazyList[Int] = _
+  var lazyList2b: LazyList[Int] = _
+  var lazyList3b: LazyList[Int] = _
 
   var estream0: EStream[Int] = _
   var estream1: EStream[Int] = _
@@ -132,14 +132,14 @@ class ConcatBench {
     arrayC2b = Array.range(1, 100000).map(n => Pair(n, n))
     arrayC3b = Array.range(1, 1000000).map(n => Pair(n, n))
 
-    stream0 = Stream.range(1, 1000)
-    stream1 = Stream.range(1, 10000)
-    stream2 = Stream.range(1, 100000)
-    stream3 = Stream.range(1, 1000000)
-    stream0b = Stream.range(1, 1000)
-    stream1b = Stream.range(1, 10000)
-    stream2b = Stream.range(1, 100000)
-    stream3b = Stream.range(1, 1000000)
+    lazyList0 = LazyList.range(1, 1000)
+    lazyList1 = LazyList.range(1, 10000)
+    lazyList2 = LazyList.range(1, 100000)
+    lazyList3 = LazyList.range(1, 1000000)
+    lazyList0b = LazyList.range(1, 1000)
+    lazyList1b = LazyList.range(1, 10000)
+    lazyList2b = LazyList.range(1, 100000)
+    lazyList3b = LazyList.range(1, 1000000)
 
     estream0 = EStream.range(1, 1000)
     estream1 = EStream.range(1, 10000)
@@ -165,7 +165,7 @@ class ConcatBench {
   def vector(a: Vector[Int], b: Vector[Int]): Vector[Int] = a ++ b
   def array(a: Array[Int], b: Array[Int]): Array[Int] = a ++ b
   def arrayC(a: Array[Pair], b: Array[Pair]): Array[Pair] = a ++ b
-  def stream(a: Stream[Int], b: Stream[Int]): Stream[Int] = a ++ b
+  def lazyList(a: LazyList[Int], b: LazyList[Int]): LazyList[Int] = a ++ b
   def estream(a: EStream[Int], b: EStream[Int]): EStream[Int] = a ++ b
   def chain(a: Chain[Int], b: Chain[Int]): Chain[Int] = a ++ b
 
@@ -215,13 +215,13 @@ class ConcatBench {
   def arrayC1000k: Array[Pair] = arrayC(arrayC3 , arrayC3b)
 
   @Benchmark
-  def stream1k: Stream[Int] = stream(stream0 , stream0b)
+  def lazyList1k: LazyList[Int] = lazyList(lazyList0 , lazyList0b)
   @Benchmark
-  def stream10k: Stream[Int] = stream(stream1 , stream1b)
+  def lazyList10k: LazyList[Int] = lazyList(lazyList1 , lazyList1b)
   @Benchmark
-  def stream100k: Stream[Int] = stream(stream2 , stream2b)
+  def lazyList100k: LazyList[Int] = lazyList(lazyList2 , lazyList2b)
   @Benchmark
-  def stream1000k: Stream[Int] = stream(stream3 , stream3b)
+  def lazyList1000k: LazyList[Int] = lazyList(lazyList3 , lazyList3b)
 
   @Benchmark
   def estream1k: EStream[Int] = estream(estream0 , estream0b)

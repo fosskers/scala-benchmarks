@@ -20,7 +20,7 @@ class MatchContainersBench {
   var vec: Vector[Int] = _
   var arr: Array[Int] = _
   var seq: Seq[Int] = _
-  var stream: Stream[Int] = _
+  var lazyList: LazyList[Int] = _
   var chain: Chain[Int] = _
 
   @Setup
@@ -30,7 +30,7 @@ class MatchContainersBench {
     vec = Vector.range(1, 10000)
     arr = Array.range(1, 10000)
     seq = Seq.range(1, 10000)
-    stream = Stream.range(1, 10000)
+    lazyList = LazyList.range(1, 10000)
     chain = Chain.fromSeq(list)
   }
 
@@ -144,30 +144,30 @@ class MatchContainersBench {
   }
 
   @Benchmark
-  def lastStreamMatch: Option[Int] = {
-    @tailrec def work(l: Stream[Int]): Option[Int] = l match {
-      case Stream() => None
-      case h #:: Stream() => Some(h)
+  def lastLazyListMatch: Option[Int] = {
+    @tailrec def work(l: LazyList[Int]): Option[Int] = l match {
+      case LazyList() => None
+      case h #:: LazyList() => Some(h)
       case _ #:: rest => work(rest)
     }
 
-    work(stream)
+    work(lazyList)
   }
 
   @Benchmark
-  def lastStreamMatchGeneric: Option[Int] = {
-    @tailrec def work(l: Stream[Int]): Option[Int] = l match {
-      case Stream() => None
-      case h +: Stream() => Some(h)
+  def lastLazyListMatchGeneric: Option[Int] = {
+    @tailrec def work(l: LazyList[Int]): Option[Int] = l match {
+      case LazyList() => None
+      case h +: LazyList() => Some(h)
       case _ +: rest => work(rest)
     }
 
-    work(stream)
+    work(lazyList)
   }
 
   @Benchmark
-  def lastStreamIf: Option[Int] = {
-    @tailrec def work(l: Stream[Int]): Option[Int] = {
+  def lastLazyListIf: Option[Int] = {
+    @tailrec def work(l: LazyList[Int]): Option[Int] = {
       if (l.isEmpty) { None }
       else {
         val t = l.tail
@@ -175,7 +175,7 @@ class MatchContainersBench {
       }
     }
 
-    work(stream)
+    work(lazyList)
   }
 
   @Benchmark
