@@ -9,9 +9,9 @@ An independent set of benchmarks for testing common Scala idioms.
   - [[#chained-higher-order-functions][Chained Higher-Order Functions]]
   - [[#concatenation][Concatenation]]
 - [[#mutable-data][Mutable Data]]
-  - [[#list-ilist-and-array][~List~, ~IList~ and ~Array~]]
-  - [[#builder-classes][~*Builder~ Classes]]
-  - [[#mutable-set-and-javas-concurrenthashmap][Mutable ~Set~ and Java's ~ConcurrentHashMap~]]
+  - [[#list-ilist-and-array][List, IList and Array]]
+  - [[#builder-classes][Builder Classes]]
+  - [[#mutable-set-and-javas-concurrenthashmap][Mutable Set and Java's ConcurrentHashMap]]
 - [[#pattern-matching][Pattern Matching]]
   - [[#deconstructing-containers][Deconstructing Containers]]
   - [[#guard-patterns][Guard Patterns]]
@@ -190,7 +190,7 @@ If you're worried about passing a mutable collection around your API, consider
 
 * Mutable Data
 
-** ~List~, ~IList~ and ~Array~
+** List, IList and Array
 
 Above we saw that ~List~ performs strongly against ~Array~ when it comes to
 chaining multiple higher-order functions together. What happens when we just
@@ -229,7 +229,7 @@ will be cleaner and comparitively performant if you stick to immutable
 collections and chained higher-order functions.
 #+END_QUOTE
 
-** ~*Builder~ Classes
+** Builder Classes
 
 You want to build up a new collection, perhaps iterating over an existing one,
 perhaps from some live, dynamic process. For whatever reason ~.map~ and
@@ -287,7 +287,7 @@ building your collection with ~VectorBuilder~, call ~.iterator~ once filled,
 then continue.
 #+END_QUOTE
 
-** Mutable ~Set~ and Java's ~ConcurrentHashMap~
+** Mutable Set and Java's ConcurrentHashMap
 
 You'd like to build up a unique set of values and for some reason calling
 ~.toSet~ on your original collection isn't enough. Perhaps you don't have an
