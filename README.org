@@ -4,24 +4,21 @@
 An independent set of benchmarks for testing common Scala idioms.
 
 * Table of Contents                     :TOC_4_gh:noexport:
-- [[#results][Results]]
-  - [[#functional-programming][Functional Programming]]
-    - [[#folding][Folding]]
-    - [[#chained-higher-order-functions][Chained Higher-Order Functions]]
-    - [[#concatenation][Concatenation]]
-  - [[#mutable-data][Mutable Data]]
-    - [[#list-ilist-and-array][~List~, ~IList~ and ~Array~]]
-    - [[#builder-classes][~*Builder~ Classes]]
-    - [[#mutable-set-and-javas-concurrenthashmap][Mutable ~Set~ and Java's ~ConcurrentHashMap~]]
-  - [[#pattern-matching][Pattern Matching]]
-    - [[#deconstructing-containers][Deconstructing Containers]]
-    - [[#guard-patterns][Guard Patterns]]
+- [[#functional-programming][Functional Programming]]
+  - [[#folding][Folding]]
+  - [[#chained-higher-order-functions][Chained Higher-Order Functions]]
+  - [[#concatenation][Concatenation]]
+- [[#mutable-data][Mutable Data]]
+  - [[#list-ilist-and-array][~List~, ~IList~ and ~Array~]]
+  - [[#builder-classes][~*Builder~ Classes]]
+  - [[#mutable-set-and-javas-concurrenthashmap][Mutable ~Set~ and Java's ~ConcurrentHashMap~]]
+- [[#pattern-matching][Pattern Matching]]
+  - [[#deconstructing-containers][Deconstructing Containers]]
+  - [[#guard-patterns][Guard Patterns]]
 
-* Results
+* Functional Programming
 
-** Functional Programming
-
-*** Folding
+** Folding
 
 We often want to collapse a collection into some summary of its elements.
 This is known as a /fold/, a /reduce/, or a /catamorphism/:
@@ -89,7 +86,7 @@ If you were already dealing with an ~Array[Int]~ or likewise, then a ~while~
 loop will be faster.
 #+END_QUOTE
 
-*** Chained Higher-Order Functions
+** Chained Higher-Order Functions
 
 It's common to string together multiple operations over a collection, say:
 
@@ -148,7 +145,7 @@ If you have something like a ~List~ instead, create an ~Iterator~ first
 with ~.iterator~ before you chain.
 #+END_QUOTE
 
-*** Concatenation
+** Concatenation
 
 Sometimes we need to merge two instances of a container together, end-to-end.
 This is embodied by the classic operator ~++~, available for all the major collection types.
@@ -187,9 +184,9 @@ If you're worried about passing a mutable collection around your API, consider
 ~scalaz.ImmutableArray~, a simple wrapper that prevents careless misuse.
 #+END_QUOTE
 
-** Mutable Data
+* Mutable Data
 
-*** ~List~, ~IList~ and ~Array~
+** ~List~, ~IList~ and ~Array~
 
 Above we saw that ~List~ performs strongly against ~Array~ when it comes
 to chaining multiple higher-order functions together. What happens when
@@ -229,7 +226,7 @@ and comparitively performant if you stick to immutable collections and chained
 higher-order functions.
 #+END_QUOTE
 
-*** ~*Builder~ Classes
+** ~*Builder~ Classes
 
 You want to build up a new collection, perhaps iterating over an existing one,
 perhaps from some live, dynamic process. For whatever reason ~.map~ and ~.foldLeft~
@@ -286,7 +283,7 @@ If the algorithm can't be expressed in terms of ~Iterator~ from the get-go, try 
 your collection with ~VectorBuilder~, call ~.iterator~ once filled, then continue.
 #+END_QUOTE
 
-*** Mutable ~Set~ and Java's ~ConcurrentHashMap~
+** Mutable ~Set~ and Java's ~ConcurrentHashMap~
 
 You'd like to build up a unique set of values and for some reason calling ~.toSet~
 on your original collection isn't enough. Perhaps you don't have an original collection.
@@ -326,9 +323,9 @@ If that isn't possible, then trust in the performance of native Scala collection
 and use ~mutable.Set~.
 #+END_QUOTE
 
-** Pattern Matching
+* Pattern Matching
 
-*** Deconstructing Containers
+** Deconstructing Containers
 
 It's common to decontruct containers like this in recursive algorithms:
 
@@ -388,7 +385,7 @@ Recursion involving containers should be done with ~List~ and pattern matching
 for the best balance of speed and simplicity. If you can take ~scalaz~ as a
 dependency, its ~IList~ will be even faster.
 #+END_QUOTE
-*** Guard Patterns
+** Guard Patterns
 
 It can sometimes be cleaner to check multiple ~Boolean~ conditions using a ~match~:
 
