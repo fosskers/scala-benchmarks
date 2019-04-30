@@ -1,14 +1,24 @@
 #+TITLE: Scala Benchmarks
 #+AUTHOR: Colin
-#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="/home/colin/code/org-theme.css"/>
 
 An independent set of benchmarks for testing common Scala idioms.
 
-** Results
+* Table of Contents                     :TOC_4_gh:noexport:
+- [[#functional-programming][Functional Programming]]
+  - [[#folding][Folding]]
+  - [[#chained-higher-order-functions][Chained Higher-Order Functions]]
+  - [[#concatenation][Concatenation]]
+- [[#mutable-data][Mutable Data]]
+  - [[#list-ilist-and-array][~List~, ~IList~ and ~Array~]]
+  - [[#builder-classes][~*Builder~ Classes]]
+  - [[#mutable-set-and-javas-concurrenthashmap][Mutable ~Set~ and Java's ~ConcurrentHashMap~]]
+- [[#pattern-matching][Pattern Matching]]
+  - [[#deconstructing-containers][Deconstructing Containers]]
+  - [[#guard-patterns][Guard Patterns]]
 
-*** Functional Programming
+* Functional Programming
 
-**** Folding
+** Folding
 
 We often want to collapse a collection into some summary of its elements.
 This is known as a /fold/, a /reduce/, or a /catamorphism/:
@@ -30,9 +40,10 @@ variables? For instance the familiar, manual, and error-prone:
   }
 #+END_SRC
 
-~FoldBench~ compares ~List~, ~scalaz.IList~, ~Vector~, ~Array~, ~Stream~, and ~Iterator~ for their speeds
-in various fold operations over Ints. ~FoldClassBench~ tries these same operations over a simple
-wrapping class to see how boxing/references affect things.
+~FoldBench~ compares ~List~, ~scalaz.IList~, ~Vector~, ~Array~, ~Stream~, and
+~Iterator~ for their speeds in various fold operations over Ints.
+~FoldClassBench~ tries these same operations over a simple wrapping class to see
+how boxing/references affect things.
 
 ~Int~ Results:
 
@@ -76,7 +87,7 @@ If you were already dealing with an ~Array[Int]~ or likewise, then a ~while~
 loop will be faster.
 #+END_QUOTE
 
-**** Chained Higher-Order Functions
+** Chained Higher-Order Functions
 
 It's common to string together multiple operations over a collection, say:
 
@@ -88,12 +99,12 @@ which is certainly shorter and cleaner in its intent than manually manipulating
 a mutable collection in a ~while~ loop. Are higher-order operations like these
 still fast? People used to Haskell's list fusion might point out that these
 operations typically don't fuse in Scala, meaning that each chained operation
-fully iterates over the entire collection and allocates a new copy. ~Stream~
-and ~Iterator~ are supposed to be the exceptions, however.
+fully iterates over the entire collection and allocates a new copy. ~Stream~ and
+~Iterator~ are supposed to be the exceptions, however.
 
-~Stream~ in particular is what people wanting Haskell's lazy lists may reach
-for first, on the claim that the elements memoize, chained operations fuse,
-and they support infinite streams of values. Let's see how everything performs.
+~Stream~ in particular is what people wanting Haskell's lazy lists may reach for
+first, on the claim that the elements memoize, chained operations fuse, and they
+support infinite streams of values. Let's see how everything performs.
 
 ~StreamBench~ performs the following operations on ~List~, ~scalaz.IList~,
 ~Vector~, ~Array~, ~Stream~, ~scalaz.EphemeralStream~ and ~Iterator~. We test:
@@ -135,19 +146,22 @@ If you have something like a ~List~ instead, create an ~Iterator~ first
 with ~.iterator~ before you chain.
 #+END_QUOTE
 
-**** Concatenation
+** Concatenation
 
 Sometimes we need to merge two instances of a container together, end-to-end.
-This is embodied by the classic operator ~++~, available for all the major collection types.
+This is embodied by the classic operator ~++~, available for all the major
+collection types.
 
-We know that the collection types are implemented differently. Are some better than
-others when it comes to ~++~? For instance, we might imagine that the singly-linked ~List~
-type would be quite bad at this. The lazy ~Stream~ types should be instantaneous.
+We know that the collection types are implemented differently. Are some better
+than others when it comes to ~++~? For instance, we might imagine that the
+singly-linked ~List~ type would be quite bad at this. The lazy ~Stream~ types
+should be instantaneous.
 
-~ConcatBench~ tests ~List~, ~scalaz.IList~, ~Array~, ~Vector~, ~Stream~, and ~scalaz.EphemeralStream~
-for their performance with the ~++~ operator. Two results are offered for ~Array~: one with ~Int~ and
-one for a simple ~Pair~ class, to see if primitive Arrays can somehow be optimized here by the JVM,
-as they usually are. Otherwise, the results are all for collections of ~Int~.
+~ConcatBench~ tests ~List~, ~scalaz.IList~, ~Array~, ~Vector~, ~Stream~, and
+~scalaz.EphemeralStream~ for their performance with the ~++~ operator. Two
+results are offered for ~Array~: one with ~Int~ and one for a simple ~Pair~
+class, to see if primitive Arrays can somehow be optimized here by the JVM, as
+they usually are. Otherwise, the results are all for collections of ~Int~.
 
 /All times are in microseconds./
 
@@ -174,19 +188,18 @@ If you're worried about passing a mutable collection around your API, consider
 ~scalaz.ImmutableArray~, a simple wrapper that prevents careless misuse.
 #+END_QUOTE
 
-*** Mutable Data
+* Mutable Data
 
-**** ~List~, ~IList~ and ~Array~
+** ~List~, ~IList~ and ~Array~
 
-Above we saw that ~List~ performs strongly against ~Array~ when it comes
-to chaining multiple higher-order functions together. What happens when
-we just need to make a single transformation pass over our collection -
-in other words, a ~.map~? ~Array~ with a ~while~ loop is supposed to be
-the fastest iterating operation on the JVM. Can ~List~ and ~IList~ still
-stand up to it?
+Above we saw that ~List~ performs strongly against ~Array~ when it comes to
+chaining multiple higher-order functions together. What happens when we just
+need to make a single transformation pass over our collection - in other words,
+a ~.map~? ~Array~ with a ~while~ loop is supposed to be the fastest iterating
+operation on the JVM. Can ~List~ and ~IList~ still stand up to it?
 
-~MapBench~ compares these operations over increasing larger collection sizes
-of both ~Int~ and a simple wrapper class.
+~MapBench~ compares these operations over increasing larger collection sizes of
+both ~Int~ and a simple wrapper class.
 
 Results:
 
@@ -210,25 +223,25 @@ Observations:
 Recommendation:
 
 #+BEGIN_QUOTE
-If your code involves ~Array~, primitives, and simple single-pass transformations,
-then ~while~ loops will be fast for you. Otherwise, your code will be cleaner
-and comparitively performant if you stick to immutable collections and chained
-higher-order functions.
+If your code involves ~Array~, primitives, and simple single-pass
+transformations, then ~while~ loops will be fast for you. Otherwise, your code
+will be cleaner and comparitively performant if you stick to immutable
+collections and chained higher-order functions.
 #+END_QUOTE
 
-**** ~*Builder~ Classes
+** ~*Builder~ Classes
 
 You want to build up a new collection, perhaps iterating over an existing one,
-perhaps from some live, dynamic process. For whatever reason ~.map~ and ~.foldLeft~
-are not an option. Which collection is best for this?
-~VectorBench~ tests how fast each of ~List~, ~scalaz.IList~, ~ListBuffer~, ~Vector~, ~VectorBuilder~,
-~Array~, ~ArrayBuilder~, and ~IndexedSeq~ can create themselves and
-accumulate values. For ~List~, this is done with tail recursion. For ~IndexedSeq~,
-this is done via a naive for-comprehension. For all others,
-this is done with ~while~ loops. The ~Buffer~ and ~Builder~ classes perform a
+perhaps from some live, dynamic process. For whatever reason ~.map~ and
+~.foldLeft~ are not an option. Which collection is best for this? ~VectorBench~
+tests how fast each of ~List~, ~scalaz.IList~, ~ListBuffer~, ~Vector~,
+~VectorBuilder~, ~Array~, ~ArrayBuilder~, and ~IndexedSeq~ can create themselves
+and accumulate values. For ~List~, this is done with tail recursion. For
+~IndexedSeq~, this is done via a naive for-comprehension. For all others, this
+is done with ~while~ loops. The ~Buffer~ and ~Builder~ classes perform a
 ~.result~ call at the end of iterating to take their non-builder forms (i.e.
-~VectorBuilder => Vector~). ~ArrayBuilder~ is given an overshot size hint (with ~.sizeHint~)
-in order to realistically minimize inner ~Array~ copying.
+~VectorBuilder => Vector~). ~ArrayBuilder~ is given an overshot size hint (with
+~.sizeHint~) in order to realistically minimize inner ~Array~ copying.
 
 Results:
 
@@ -261,28 +274,31 @@ The best choice here depends on what your next step is.
 
 If you plan to perform ~while~ -based numeric calculations over primitives only,
 stick to ~Array~. If using ~ArrayBuilder~ with primitives, avoid the ~.make~
-method. Use something like ~.ofInt~ instead. Also make sure that you use ~.sizeHint~
-to avoid redundant inner ~Array~ copying as your collection grows. Failing to do so
-can introduce a 5x slowdown.
+method. Use something like ~.ofInt~ instead. Also make sure that you use
+~.sizeHint~ to avoid redundant inner ~Array~ copying as your collection grows.
+Failing to do so can introduce a 5x slowdown.
 
-Otherwise, consider whether your algorithm can't be reexpressed entirely in terms
-of ~Iterator~. This will always give the best performance for subsequent chained,
-higher-order functions.
+Otherwise, consider whether your algorithm can't be reexpressed entirely in
+terms of ~Iterator~. This will always give the best performance for subsequent
+chained, higher-order functions.
 
-If the algorithm can't be expressed in terms of ~Iterator~ from the get-go, try building
-your collection with ~VectorBuilder~, call ~.iterator~ once filled, then continue.
+If the algorithm can't be expressed in terms of ~Iterator~ from the get-go, try
+building your collection with ~VectorBuilder~, call ~.iterator~ once filled,
+then continue.
 #+END_QUOTE
 
-**** Mutable ~Set~ and Java's ~ConcurrentHashMap~
+** Mutable ~Set~ and Java's ~ConcurrentHashMap~
 
-You'd like to build up a unique set of values and for some reason calling ~.toSet~
-on your original collection isn't enough. Perhaps you don't have an original collection.
-Scala's collections have been criticized for their performance, with one famous complaint
-saying how their team had to fallback to using Java collection types entirely because
-the Scala ones couldn't compare (that was for Scala 2.8, mind you).
+You'd like to build up a unique set of values and for some reason calling
+~.toSet~ on your original collection isn't enough. Perhaps you don't have an
+original collection. Scala's collections have been criticized for their
+performance, with one famous complaint saying how their team had to fallback to
+using Java collection types entirely because the Scala ones couldn't compare
+(that was for Scala 2.8, mind you).
 
-Is this true? ~UniquesBench~ compares both of Scala's mutable and immutable ~Set~ types with
-Java's ~ConcurrentHashMap~ to see which can accumulate unique values faster.
+Is this true? ~UniquesBench~ compares both of Scala's mutable and immutable
+~Set~ types with Java's ~ConcurrentHashMap~ to see which can accumulate unique
+values faster.
 
 Results:
 
@@ -294,8 +310,8 @@ Results:
 | 1000 values  |          62.2 |           107.4 |                     71.3 |
 | 10000 values |        811.1* |          1290.4 |                    777.1 |
 
-*Note*: About half the time the 10000-value benchmark for ~mutable.Set~ optimizes
-down to ~600us instead of the ~800us shown in the chart.
+*Note*: About half the time the 10000-value benchmark for ~mutable.Set~
+optimizes down to ~600us instead of the ~800us shown in the chart.
 
 Observations:
 
@@ -309,13 +325,13 @@ Recommendation:
 First consider whether your algorithm can't be rewritten in terms of the usual
 FP idioms, followed by a ~.toSet~ call to make the collection unique.
 
-If that isn't possible, then trust in the performance of native Scala collections
-and use ~mutable.Set~.
+If that isn't possible, then trust in the performance of native Scala
+collections and use ~mutable.Set~.
 #+END_QUOTE
 
-*** Pattern Matching
+* Pattern Matching
 
-**** Deconstructing Containers
+** Deconstructing Containers
 
 It's common to decontruct containers like this in recursive algorithms:
 
@@ -336,16 +352,17 @@ respectively. The ~List~ version of the above looks like:
   }
 #+END_SRC
 
-How do these operators compare? Also, is it any slower to do it this way than
-a more Java-like:
+How do these operators compare? Also, is it any slower to do it this way than a
+more Java-like:
 
 #+BEGIN_SRC scala
   def safeHead[A](l: List[A]): Option[A] =
     if (l.isEmpty) None else l.head
 #+END_SRC
 
-The ~MatchContainersBench~ benchmarks use a tail-recursive algorithm to find
-the last element of each of ~List~, ~scalaz.IList~, ~Vector~, ~Array~, ~Seq~, and ~Stream~.
+The ~MatchContainersBench~ benchmarks use a tail-recursive algorithm to find the
+last element of each of ~List~, ~scalaz.IList~, ~Vector~, ~Array~, ~Seq~, and
+~Stream~.
 
 Results:
 
@@ -375,7 +392,7 @@ Recursion involving containers should be done with ~List~ and pattern matching
 for the best balance of speed and simplicity. If you can take ~scalaz~ as a
 dependency, its ~IList~ will be even faster.
 #+END_QUOTE
-**** Guard Patterns
+** Guard Patterns
 
 It can sometimes be cleaner to check multiple ~Boolean~ conditions using a ~match~:
 
@@ -388,8 +405,8 @@ It can sometimes be cleaner to check multiple ~Boolean~ conditions using a ~matc
   }
 #+END_SRC
 
-where we don't really care about the pattern match, just the guard.
-This is in constrast to ~if~ branches:
+where we don't really care about the pattern match, just the guard. This is in
+constrast to ~if~ branches:
 
 #+BEGIN_SRC scala
   def foo(i: Int): Whatever = {
@@ -400,9 +417,9 @@ This is in constrast to ~if~ branches:
   }
 #+END_SRC
 
-which of course would often be made more verbose by many ~{}~ pairs.
-Are we punished for the empty pattern matches? ~MatchBench~ tests this, with
-various numbers of branches.
+which of course would often be made more verbose by many ~{}~ pairs. Are we
+punished for the empty pattern matches? ~MatchBench~ tests this, with various
+numbers of branches.
 
 Results:
 
