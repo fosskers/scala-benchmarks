@@ -2,7 +2,7 @@ name := """scala-benchmarks"""
 
 version := "1.0.0"
 
-scalaVersion := "2.12.6"
+scalaVersion := "2.12.8"
 
 scalacOptions := Seq(
   "-opt:l:inline",
@@ -16,7 +16,7 @@ scalacOptions := Seq(
 )
 
 libraryDependencies ++= Seq(
-  "org.scalaz" %% "scalaz-core" % "7.2.24"
+  "org.scalaz" %% "scalaz-core" % "7.2.27"
 )
 
 /* To run benchmarks:
